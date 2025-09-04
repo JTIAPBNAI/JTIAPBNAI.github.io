@@ -20,7 +20,7 @@ Each artifact is self-contained and runs directly in your browser — just click
 - [โจทย์เรื่องพหุนาม](https://JTIAPBNAI.github.io/โจทย์เรื่องพหุนาม.html)
 - [โจทย์เรื่องเรขาคณิต](https://JTIAPBNAI.github.io/โจทย์เรื่องเรขาคณิต.html)
 
-### Science Concepts
+### Science
 - [ตารางธาตุ](https://JTIAPBNAI.github.io/ตารางธาตุ.html)
 - [แบบจำลองความต่างศักย์ไฟฟ้า](https://JTIAPBNAI.github.io/แบบจำลองความต่างศักย์ไฟฟ้า.html)
 - [สรุปกลศาสตร์ของไหลเบื้องต้น](https://JTIAPBNAI.github.io/สรุปกลศาสตร์ของไหลเบื้องต้น.html)
