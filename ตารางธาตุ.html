@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ตารางธาตุแบบโต้ตอบ</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;700&display=swap');
+
+        :root {
+            --bg-color: #f0f2f5;
+            --text-color: #333;
+            --panel-bg: #ffffff;
+            --border-color: #ccc;
+            --hover-border: #007bff;
+            --grid-gap: 5px;
+            --cell-size: 4em; /* Base cell width for 18 columns */
+        }
+
+        body {
+            font-family: 'Sarabun', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            width: 100%;
+            padding: 20px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        h1, h2, h3 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        p {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .periodic-table {
+            display: grid;
+            grid-template-columns: repeat(18, var(--cell-size));
+            grid-template-rows: repeat(9, auto); /* 7 periods + 2 for lanthanides/actinides */
+            gap: var(--grid-gap);
+            width: fit-content;
+            margin: 0 auto;
+            border: 1px solid var(--border-color);
+            padding: var(--grid-gap);
+            background-color: var(--panel-bg);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            overflow-x: auto; /* Enable horizontal scrolling on small screens */
+            max-width: 100%; /* Ensure it doesn't overflow */
+        }
+
+        .element-cell {
+            background-color: #f9f9f9;
+            border: 1px solid var(--border-color);
+            padding: 0.5em;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            text-align: center;
+            font-size: 0.8em;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            height: var(--cell-size);
+            width: var(--cell-size);
+            box-sizing: border-box;
+            position: relative;
+            user-select: none;
+            overflow: hidden; /* Prevent text overflow */
+        }
+
+        .element-cell:hover {
+            transform: scale(1.05);
+            border-color: var(--hover-border);
+            box-shadow: 0 0 10px rgba(0, 123, 255, 0.5);
+            z-index: 10;
+        }
+
+        .atomic-number {
+            position: absolute;
+            top: 2px;
+            left: 4px;
+            font-size: 0.6em;
+            font-weight: bold;
+        }
+
+        .symbol {
+            font-size: 1.8em;
+            font-weight: bold;
+            margin-top: 0.3em;
+            color: #2c3e50;
+        }
+
+        .name {
+            font-size: 0.6em;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            width: 100%;
+            margin-top: auto;
+        }
+
+        .element-placeholder {
+            background-color: transparent;
+            border: none;
+            pointer-events: none;
+            visibility: hidden; /* Hide placeholders */
+            height: var(--cell-size);
+            width: var(--cell-size);
+            box-sizing: border-box;
+        }
+        
+        /* Placeholder for f-block series gap */
+        .fblock-placeholder {
+            grid-column: 3 / span 15; /* Spans 15 columns for Lanthanides/Actinides */
+            grid-row: 6; /* In Period 6 row */
+            background-color: transparent;
+            border: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.8em;
+            color: #666;
+            height: var(--cell-size);
+        }
+        .fblock-placeholder-actinides {
+             grid-row: 7; /* In Period 7 row */
+        }
+        .fblock-placeholder a {
+            color: var(--hover-border);
+            text-decoration: none;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .element-detail-panel {
+            background-color: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            width: 400px;
+            max-width: 100%;
+            position: sticky;
+            top: 20px;
+            margin-left: 20px;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+            box-sizing: border-box;
+            align-self: flex-start; /* Align to the start of the container */
+        }
+        .container {
+            flex-direction: row; /* For desktop, periodic table and detail panel side by side */
+            align-items: flex-start;
+        }
+        .periodic-table-wrapper {
+            flex-grow: 1; /* Allow periodic table to take available space */
+            overflow-x: auto;
+        }
+        .element-detail-panel.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .detail-symbol {
+            font-size: 3em;
+            font-weight: bold;
+            color: #34495e;
+            line-height: 1;
+        }
+
+        .detail-atomic-number {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #7f8c8d;
+        }
+
+        .detail-name {
+            font-size: 1.8em;
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: #2c3e50;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        .detail-info p {
+            margin: 5px 0;
+            text-align: left;
+            font-size: 0.95em;
+        }
+        .detail-info strong {
+            color: #555;
+        }
+
+        .detail-description {
+            margin-top: 20px;
+            font-style: italic;
+            color: #666;
+            text-align: left;
+        }
+
+        /* Category Colors */
+        .alkali-metal { background-color: #FF6F61; color: white; } /* Red-orange */
+        .alkaline-earth-metal { background-color: #FFB84C; color: #333; } /* Orange */
+        .lanthanide { background-color: #A2D2FF; color: #333; } /* Light Blue */
+        .actinide { background-color: #B19CD9; color: white; } /* Lavender */
+        .transition-metal { background-color: #8FBC8F; color: white; } /* Dark Sea Green */
+        .post-transition-metal { background-color: #98D8AA; color: #333; } /* Medium Aqua Marine */
+        .metalloid { background-color: #C6E2EE; color: #333; } /* Light Steel Blue */
+        .nonmetal { background-color: #90EE90; color: #333; } /* Light Green */
+        .halogen { background-color: #FFD700; color: #333; } /* Gold */
+        .noble-gas { background-color: #ADD8E6; color: #333; } /* Light Blue */
+        .unknown { background-color: #D3D3D3; color: #333; } /* Light Gray */
+
+        /* Legend Styling */
+        .legend {
+            background-color: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .legend h3 {
+            margin-top: 0;
+            font-size: 1.2em;
+        }
+
+        #legendItems {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            font-size: 0.9em;
+        }
+
+        .legend-color-box {
+            width: 20px;
+            height: 20px;
+            border: 1px solid var(--border-color);
+            margin-right: 8px;
+            border-radius: 3px;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 1300px) {
+            :root {
+                --cell-size: 3.5em;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            :root {
+                --cell-size: 3em;
+            }
+            .periodic-table {
+                grid-template-columns: repeat(18, var(--cell-size));
+                overflow-x: scroll; /* Force scroll for smaller screens */
+            }
+            .element-cell {
+                font-size: 0.7em;
+                padding: 0.2em;
+            }
+            .element-cell .symbol {
+                font-size: 1.2em;
+            }
+            .element-cell .atomic-number {
+                font-size: 0.6em;
+            }
+            .element-cell .name {
+                font-size: 0.6em;
+            }
+
+            .container {
+                flex-direction: column; /* Stack on smaller screens */
+                align-items: center;
+                padding: 10px;
+            }
+            .element-detail-panel {
+                position: static; /* Remove sticky positioning */
+                margin-left: 0;
+                margin-top: 20px;
+                width: 95%; /* Wider on small screens */
+            }
+            .periodic-table-wrapper {
+                width: 100%;
+                overflow-x: auto; /* Ensure wrapper scrolls */
+            }
+        }
+
+        @media (max-width: 768px) {
+            :root {
+                --cell-size: 2.5em;
+            }
+            h1 { font-size: 1.8em; }
+            p { font-size: 0.9em; }
+            .element-cell .symbol { font-size: 1em; }
+            .element-cell .atomic-number { font-size: 0.5em; }
+            .element-cell .name { font-size: 0.5em; }
+            .detail-symbol { font-size: 2.5em; }
+            .detail-atomic-number { font-size: 1.2em; }
+            .detail-name { font-size: 1.5em; }
+            .detail-info p, .detail-description { font-size: 0.85em; }
+        }
+
+        @media (max-width: 480px) {
+            :root {
+                --cell-size: 2em; /* Smallest cell size */
+            }
+            h1 { font-size: 1.5em; }
+            p { font-size: 0.8em; }
+            .legend-item { font-size: 0.8em; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="periodic-table-wrapper">
+            <h1>ตารางธาตุแบบโต้ตอบ (Interactive Periodic Table)</h1>
+            <p>ชี้เมาส์ไปที่ธาตุเพื่อดูข้อมูลและคำอธิบาย</p>
+
+            <div class="periodic-table" id="periodicTable">
+                <!-- Elements will be injected here by JavaScript -->
+            </div>
+
+            <div class="legend" id="categoryLegend">
+                <h3>คำอธิบายประเภทธาตุ</h3>
+                <div id="legendItems"></div>
+            </div>
+        </div>
+
+        <div class="element-detail-panel" id="detailPanel">
+            <!-- Details will be displayed here on hover -->
+            <div class="detail-header">
+                <span id="detailSymbol" class="detail-symbol"></span>
+                <span id="detailAtomicNumber" class="detail-atomic-number"></span>
+            </div>
+            <h2 id="detailName" class="detail-name"></h2>
+            <div class="detail-info">
+                <p><strong>มวลอะตอม:</strong> <span id="detailAtomicMass"></span></p>
+                <p><strong>การจัดเรียงอิเล็กตรอน:</strong> <span id="detailElectronConfiguration"></span></p>
+                <p><strong>จุดหลอมเหลว:</strong> <span id="detailMeltingPoint"></span></p>
+                <p><strong>จุดเดือด:</strong> <span id="detailBoilingPoint"></span></p>
+                <p><strong>ความหนาแน่น:</strong> <span id="detailDensity"></span></p>
+                <p><strong>กลุ่ม:</strong> <span id="detailGroup"></span></p>
+                <p><strong>คาบ:</strong> <span id="detailPeriod"></span></p>
+                <p><strong>ค่าอิเล็กโทรเนกาทิวิตี:</strong> <span id="detailElectronegativity"></span></p>
+            </div>
+            <p class="detail-description" id="detailDescription"></p>
+        </div>
+    </div>
+
+    <script>
+        const elementsData = [
+            { name_th: "ไฮโดรเจน", symbol: "H", atomic_number: 1, atomic_mass: 1.008, category: "nonmetal", group: 1, period: 1, x: 1, y: 1, electron_configuration: "1s¹", melting_point_c: -259.16, boiling_point_c: -252.87, density_g_cm3: 0.00008988, electronegativity: 2.20, description_th: "ธาตุที่เบาที่สุดและเป็นธาตุที่มีมากที่สุดในจักรวาล เป็นส่วนประกอบหลักของน้ำ" },
+            { name_th: "ฮีเลียม", symbol: "He", atomic_number: 2, atomic_mass: 4.0026, category: "noble-gas", group: 18, period: 1, x: 18, y: 1, electron_configuration: "1s²", melting_point_c: -272.2, boiling_point_c: -268.93, density_g_cm3: 0.0001786, electronegativity: null, description_th: "ก๊าซเฉื่อยที่เบาที่สุดและเป็นอันดับสองที่เบาที่สุดในจักรวาล ใช้เติมในบอลลูน" },
+            { name_th: "ลิเทียม", symbol: "Li", atomic_number: 3, atomic_mass: 6.94, category: "alkali-metal", group: 1, period: 2, x: 1, y: 2, electron_configuration: "[He] 2s¹", melting_point_c: 180.5, boiling_point_c: 1342, density_g_cm3: 0.534, electronegativity: 0.98, description_th: "โลหะอัลคาไลที่เบาที่สุด ใช้ในแบตเตอรี่และโลหะผสม" },
+            { name_th: "เบริลเลียม", symbol: "Be", atomic_number: 4, atomic_mass: 9.0122, category: "alkaline-earth-metal", group: 2, period: 2, x: 2, y: 2, electron_configuration: "[He] 2s²", melting_point_c: 1287, boiling_point_c: 2470, density_g_cm3: 1.85, electronegativity: 1.57, description_th: "โลหะอัลคาไลน์เอิร์ธสีเทา มีน้ำหนักเบาและแข็งแรงมาก ใช้ในอุตสาหกรรมอากาศยาน" },
+            { name_th: "โบรอน", symbol: "B", atomic_number: 5, atomic_mass: 10.81, category: "metalloid", group: 13, period: 2, x: 13, y: 2, electron_configuration: "[He] 2s² 2p¹", melting_point_c: 2075, boiling_point_c: 3927, density_g_cm3: 2.34, electronegativity: 2.04, description_th: "กึ่งโลหะที่มีคุณสมบัติเป็นทั้งโลหะและอโลหะ ใช้ในแก้ว พลุ และผงซักฟอก" },
+            { name_th: "คาร์บอน", symbol: "C", atomic_number: 6, atomic_mass: 12.011, category: "nonmetal", group: 14, period: 2, x: 14, y: 2, electron_configuration: "[He] 2s² 2p²", melting_point_c: 3500, boiling_point_c: 4827, density_g_cm3: 2.267, electronegativity: 2.55, description_th: "เป็นพื้นฐานของสิ่งมีชีวิตทั้งหมด มีอยู่ในเพชร กราไฟต์ และถ่านหิน" },
+            { name_th: "ไนโตรเจน", symbol: "N", atomic_number: 7, atomic_mass: 14.007, category: "nonmetal", group: 15, period: 2, x: 15, y: 2, electron_configuration: "[He] 2s² 2p³", melting_point_c: -210, boiling_point_c: -195.8, density_g_cm3: 0.0012506, electronegativity: 3.04, description_th: "ก๊าซที่พบมากที่สุดในบรรยากาศโลก มีความสำคัญต่อโปรตีนและกรดนิวคลีอิก" },
+            { name_th: "ออกซิเจน", symbol: "O", atomic_number: 8, atomic_mass: 15.999, category: "nonmetal", group: 16, period: 2, x: 16, y: 2, electron_configuration: "[He] 2s² 2p⁴", melting_point_c: -218.79, boiling_point_c: -182.95, density_g_cm3: 0.001429, electronegativity: 3.44, description_th: "ก๊าซที่จำเป็นต่อการหายใจและการเผาไหม้ เป็นส่วนประกอบสำคัญของน้ำ" },
+            { name_th: "ฟลูออรีน", symbol: "F", atomic_number: 9, atomic_mass: 18.998, category: "halogen", group: 17, period: 2, x: 17, y: 2, electron_configuration: "[He] 2s² 2p⁵", melting_point_c: -219.62, boiling_point_c: -188.12, density_g_cm3: 0.001696, electronegativity: 3.98, description_th: "ก๊าซฮาโลเจนที่ว่องไวที่สุด ใช้ในยาสีฟันและสารทำความเย็น" },
+            { name_th: "นีออน", symbol: "Ne", atomic_number: 10, atomic_mass: 20.180, category: "noble-gas", group: 18, period: 2, x: 18, y: 2, electron_configuration: "[He] 2s² 2p⁶", melting_point_c: -248.59, boiling_point_c: -246.08, density_g_cm3: 0.0009, electronegativity: null, description_th: "ก๊าซเฉื่อยที่ให้แสงสีส้มแดงเมื่อถูกกระตุ้นด้วยไฟฟ้า ใช้ในป้ายโฆษณา" },
+            { name_th: "โซเดียม", symbol: "Na", atomic_number: 11, atomic_mass: 22.990, category: "alkali-metal", group: 1, period: 3, x: 1, y: 3, electron_configuration: "[Ne] 3s¹", melting_point_c: 97.72, boiling_point_c: 883, density_g_cm3: 0.968, electronegativity: 0.93, description_th: "โลหะอัลคาไลที่อ่อนนุ่มและว่องไวสูง พบในเกลือแกง" },
+            { name_th: "แมกนีเซียม", symbol: "Mg", atomic_number: 12, atomic_mass: 24.305, category: "alkaline-earth-metal", group: 2, period: 3, x: 2, y: 3, electron_configuration: "[Ne] 3s²", melting_point_c: 650, boiling_point_c: 1091, density_g_cm3: 1.738, electronegativity: 1.31, description_th: "โลหะอัลคาไลน์เอิร์ธน้ำหนักเบา ใช้ในโลหะผสมและพลุ" },
+            { name_th: "อะลูมิเนียม", symbol: "Al", atomic_number: 13, atomic_mass: 26.982, category: "post-transition-metal", group: 13, period: 3, x: 13, y: 3, electron_configuration: "[Ne] 3s² 3p¹", melting_point_c: 660.32, boiling_point_c: 2519, density_g_cm3: 2.70, electronegativity: 1.61, description_th: "โลหะที่พบมากที่สุดในเปลือกโลก มีน้ำหนักเบา ทนการกัดกร่อน ใช้ในบรรจุภัณฑ์และโครงสร้าง" },
+            { name_th: "ซิลิคอน", symbol: "Si", atomic_number: 14, atomic_mass: 28.085, category: "metalloid", group: 14, period: 3, x: 14, y: 3, electron_configuration: "[Ne] 3s² 3p²", melting_point_c: 1414, boiling_point_c: 3265, density_g_cm3: 2.329, electronegativity: 1.90, description_th: "กึ่งโลหะที่เป็นองค์ประกอบหลักของแก้ว เซรามิก และสารกึ่งตัวนำ" },
+            { name_th: "ฟอสฟอรัส", symbol: "P", atomic_number: 15, atomic_mass: 30.974, category: "nonmetal", group: 15, period: 3, x: 15, y: 3, electron_configuration: "[Ne] 3s² 3p³", melting_point_c: 44.1, boiling_point_c: 280.5, density_g_cm3: 1.82, electronegativity: 2.19, description_th: "อโลหะที่สำคัญต่อสิ่งมีชีวิต พบใน DNA, RNA และ ATP" },
+            { name_th: "กำมะถัน", symbol: "S", atomic_number: 16, atomic_mass: 32.06, category: "nonmetal", group: 16, period: 3, x: 16, y: 3, electron_configuration: "[Ne] 3s² 3p⁴", melting_point_c: 115.21, boiling_point_c: 444.6, density_g_cm3: 2.07, electronegativity: 2.58, description_th: "อโลหะสีเหลืองที่พบในกรดซัลฟิวริกและเป็นส่วนประกอบของโปรตีนบางชนิด" },
+            { name_th: "คลอรีน", symbol: "Cl", atomic_number: 17, atomic_mass: 35.45, category: "halogen", group: 17, period: 3, x: 17, y: 3, electron_configuration: "[Ne] 3s² 3p⁵", melting_point_c: -101.5, boiling_point_c: -34.04, density_g_cm3: 0.0032, electronegativity: 3.16, description_th: "ก๊าซฮาโลเจนสีเขียวเหลือง เป็นสารฟอกขาวและฆ่าเชื้อโรค" },
+            { name_th: "อาร์กอน", symbol: "Ar", atomic_number: 18, atomic_mass: 39.948, category: "noble-gas", group: 18, period: 3, x: 18, y: 3, electron_configuration: "[Ne] 3s² 3p⁶", melting_point_c: -189.34, boiling_point_c: -185.86, density_g_cm3: 0.001784, electronegativity: null, description_th: "ก๊าซเฉื่อยที่ใช้ในหลอดไฟและกระบวนการเชื่อม" },
+            { name_th: "โพแทสเซียม", symbol: "K", atomic_number: 19, atomic_mass: 39.098, category: "alkali-metal", group: 1, period: 4, x: 1, y: 4, electron_configuration: "[Ar] 4s¹", melting_point_c: 63.5, boiling_point_c: 759, density_g_cm3: 0.862, electronegativity: 0.82, description_th: "โลหะอัลคาไลที่ว่องไวสูง มีบทบาทสำคัญในการทำงานของเซลล์ประสาทและกล้ามเนื้อ" },
+            { name_th: "แคลเซียม", symbol: "Ca", atomic_number: 20, atomic_mass: 40.078, category: "alkaline-earth-metal", group: 2, period: 4, x: 2, y: 4, electron_configuration: "[Ar] 4s²", melting_point_c: 842, boiling_point_c: 1484, density_g_cm3: 1.55, electronegativity: 1.00, description_th: "โลหะอัลคาไลน์เอิร์ธที่สำคัญต่อกระดูกและฟัน" },
+            { name_th: "สแกนเดียม", symbol: "Sc", atomic_number: 21, atomic_mass: 44.956, category: "transition-metal", group: 3, period: 4, x: 3, y: 4, electron_configuration: "[Ar] 3d¹ 4s²", melting_point_c: 1541, boiling_point_c: 2836, density_g_cm3: 2.985, electronegativity: 1.36, description_th: "โลหะทรานซิชันสีเงินขาวน้ำหนักเบา ใช้ในอุปกรณ์กีฬาและแสงสว่าง" },
+            { name_th: "ไทเทเนียม", symbol: "Ti", atomic_number: 22, atomic_mass: 47.867, category: "transition-metal", group: 4, period: 4, x: 4, y: 4, electron_configuration: "[Ar] 3d² 4s²", melting_point_c: 1668, boiling_point_c: 3287, density_g_cm3: 4.506, electronegativity: 1.54, description_th: "โลหะทรานซิชันที่แข็งแรง ทนทาน และน้ำหนักเบา ใช้ในอากาศยานและการแพทย์" },
+            { name_th: "วาเนเดียม", symbol: "V", atomic_number: 23, atomic_mass: 50.942, category: "transition-metal", group: 5, period: 4, x: 5, y: 4, electron_configuration: "[Ar] 3d³ 4s²", melting_point_c: 1910, boiling_point_c: 3407, density_g_cm3: 6.11, electronegativity: 1.63, description_th: "โลหะทรานซิชันที่แข็งและยืดหยุ่น ใช้ในโลหะผสมและเครื่องมือ" },
+            { name_th: "โครเมียม", symbol: "Cr", atomic_number: 24, atomic_mass: 51.996, category: "transition-metal", group: 6, period: 4, x: 6, y: 4, electron_configuration: "[Ar] 3d⁵ 4s¹", melting_point_c: 1857, boiling_point_c: 2671, density_g_cm3: 7.19, electronegativity: 1.66, description_th: "โลหะทรานซิชันที่แข็งและมันวาว ใช้ในการชุบโลหะและเหล็กกล้าไร้สนิม" },
+            { name_th: "แมงกานีส", symbol: "Mn", atomic_number: 25, atomic_mass: 54.938, category: "transition-metal", group: 7, period: 4, x: 7, y: 4, electron_configuration: "[Ar] 3d⁵ 4s²", melting_point_c: 1246, boiling_point_c: 2061, density_g_cm3: 7.21, electronegativity: 1.55, description_th: "โลหะทรานซิชันที่ใช้ในการผลิตเหล็กและโลหะผสมอื่น ๆ" },
+            { name_th: "เหล็ก", symbol: "Fe", atomic_number: 26, atomic_mass: 55.845, category: "transition-metal", group: 8, period: 4, x: 8, y: 4, electron_configuration: "[Ar] 3d⁶ 4s²", melting_point_c: 1538, boiling_point_c: 2862, density_g_cm3: 7.874, electronegativity: 1.83, description_th: "โลหะทรานซิชันที่สำคัญที่สุดในอุตสาหกรรม เป็นส่วนประกอบหลักของเหล็กกล้า" },
+            { name_th: "โคบอลต์", symbol: "Co", atomic_number: 27, atomic_mass: 58.933, category: "transition-metal", group: 9, period: 4, x: 9, y: 4, electron_configuration: "[Ar] 3d⁷ 4s²", melting_point_c: 1495, boiling_point_c: 2927, density_g_cm3: 8.90, electronegativity: 1.88, description_th: "โลหะทรานซิชันสีเงินอมน้ำเงิน ใช้ในการผลิตแม่เหล็กและโลหะผสม" },
+            { name_th: "นิกเกิล", symbol: "Ni", atomic_number: 28, atomic_mass: 58.693, category: "transition-metal", group: 10, period: 4, x: 10, y: 4, electron_configuration: "[Ar] 3d⁸ 4s²", melting_point_c: 1455, boiling_point_c: 2913, density_g_cm3: 8.908, electronegativity: 1.91, description_th: "โลหะทรานซิชันที่ทนการกัดกร่อน ใช้ในเหรียญและเหล็กกล้าไร้สนิม" },
+            { name_th: "ทองแดง", symbol: "Cu", atomic_number: 29, atomic_mass: 63.546, category: "transition-metal", group: 11, period: 4, x: 11, y: 4, electron_configuration: "[Ar] 3d¹⁰ 4s¹", melting_point_c: 1084.62, boiling_point_c: 2560, density_g_cm3: 8.96, electronegativity: 1.90, description_th: "โลหะทรานซิชันที่เป็นตัวนำไฟฟ้าและความร้อนที่ดีเยี่ยม ใช้ในสายไฟและท่อประปา" },
+            { name_th: "สังกะสี", symbol: "Zn", atomic_number: 30, atomic_mass: 65.38, category: "post-transition-metal", group: 12, period: 4, x: 12, y: 4, electron_configuration: "[Ar] 3d¹⁰ 4s²", melting_point_c: 419.53, boiling_point_c: 907, density_g_cm3: 7.14, electronegativity: 1.65, description_th: "โลหะที่ใช้ในการเคลือบป้องกันสนิมและในแบตเตอรี่" },
+            { name_th: "แกลเลียม", symbol: "Ga", atomic_number: 31, atomic_mass: 69.723, category: "post-transition-metal", group: 13, period: 4, x: 13, y: 4, electron_configuration: "[Ar] 3d¹⁰ 4s² 4p¹", melting_point_c: 29.76, boiling_point_c: 2204, density_g_cm3: 5.91, electronegativity: 1.81, description_th: "โลหะที่มีจุดหลอมเหลวต่ำมาก ละลายในมือได้ ใช้ในอุปกรณ์อิเล็กทรอนิกส์" },
+            { name_th: "เจอร์เมเนียม", symbol: "Ge", atomic_number: 32, atomic_mass: 72.63, category: "metalloid", group: 14, period: 4, x: 14, y: 4, electron_configuration: "[Ar] 3d¹⁰ 4s² 4p²", melting_point_c: 938.25, boiling_point_c: 2833, density_g_cm3: 5.323, electronegativity: 2.01, description_th: "กึ่งโลหะที่ใช้ในสารกึ่งตัวนำและใยแก้วนำแสง" },
+            { name_th: "อาร์เซนิก", symbol: "As", atomic_number: 33, atomic_mass: 74.922, category: "metalloid", group: 15, period: 4, x: 15, y: 4, electron_configuration: "[Ar] 3d¹⁰ 4s² 4p³", melting_point_c: 817, boiling_point_c: 614, density_g_cm3: 5.72, electronegativity: 2.18, description_th: "กึ่งโลหะที่เป็นพิษ มีใช้ในสารกำจัดศัตรูพืชและสารกึ่งตัวนำ" },
+            { name_th: "ซีลีเนียม", symbol: "Se", atomic_number: 34, atomic_mass: 78.971, category: "nonmetal", group: 16, period: 4, x: 16, y: 4, electron_configuration: "[Ar] 3d¹⁰ 4s² 4p⁴", melting_point_c: 221, boiling_point_c: 685, density_g_cm3: 4.81, electronegativity: 2.55, description_th: "อโลหะที่มีคุณสมบัติเป็นสารกึ่งตัวนำเมื่อสัมผัสแสง ใช้ในเครื่องถ่ายเอกสารและเซลล์แสงอาทิตย์" },
+            { name_th: "โบรมีน", symbol: "Br", atomic_number: 35, atomic_mass: 79.904, category: "halogen", group: 17, period: 4, x: 17, y: 4, electron_configuration: "[Ar] 3d¹⁰ 4s² 4p⁵", melting_point_c: -7.2, boiling_point_c: 58.8, density_g_cm3: 3.1028, electronegativity: 2.96, description_th: "ของเหลวฮาโลเจนสีน้ำตาลแดง มีฤทธิ์กัดกร่อนสูง ใช้ในการผลิตสารหน่วงไฟ" },
+            { name_th: "คริปทอน", symbol: "Kr", atomic_number: 36, atomic_mass: 83.798, category: "noble-gas", group: 18, period: 4, x: 18, y: 4, electron_configuration: "[Ar] 3d¹⁰ 4s² 4p⁶", melting_point_c: -157.36, boiling_point_c: -153.22, density_g_cm3: 0.003749, electronegativity: 3.00, description_th: "ก๊าซเฉื่อยที่ใช้ในหลอดไฟและเลเซอร์บางชนิด" },
+            { name_th: "รูบิเดียม", symbol: "Rb", atomic_number: 37, atomic_mass: 85.468, category: "alkali-metal", group: 1, period: 5, x: 1, y: 5, electron_configuration: "[Kr] 5s¹", melting_point_c: 39.3, boiling_point_c: 688, density_g_cm3: 1.532, electronegativity: 0.82, description_th: "โลหะอัลคาไลที่ว่องไวสูงมาก ใช้ในการวิจัยและในเซลล์แสงอาทิตย์" },
+            { name_th: "สตรอนเชียม", symbol: "Sr", atomic_number: 38, atomic_mass: 87.62, category: "alkaline-earth-metal", group: 2, period: 5, x: 2, y: 5, electron_configuration: "[Kr] 5s²", melting_point_c: 777, boiling_point_c: 1377, density_g_cm3: 2.64, electronegativity: 0.95, description_th: "โลหะอัลคาไลน์เอิร์ธที่ให้เปลวไฟสีแดงสด ใช้ในพลุ" },
+            { name_th: "อิตเทรียม", symbol: "Y", atomic_number: 39, atomic_mass: 88.906, category: "transition-metal", group: 3, period: 5, x: 3, y: 5, electron_configuration: "[Kr] 4d¹ 5s²", melting_point_c: 1522, boiling_point_c: 3338, density_g_cm3: 4.47, electronegativity: 1.22, description_th: "โลหะทรานซิชันที่ใช้ในโลหะผสมและสารเรืองแสง" },
+            { name_th: "เซอร์โคเนียม", symbol: "Zr", atomic_number: 40, atomic_mass: 91.224, category: "transition-metal", group: 4, period: 5, x: 4, y: 5, electron_configuration: "[Kr] 4d² 5s²", melting_point_c: 1855, boiling_point_c: 4377, density_g_cm3: 6.51, electronegativity: 1.33, description_th: "โลหะทรานซิชันที่ทนการกัดกร่อนสูง ใช้ในเตาปฏิกรณ์นิวเคลียร์" },
+            { name_th: "ไนโอเบียม", symbol: "Nb", atomic_number: 41, atomic_mass: 92.906, category: "transition-metal", group: 5, period: 5, x: 5, y: 5, electron_configuration: "[Kr] 4d⁴ 5s¹", melting_point_c: 2477, boiling_point_c: 4744, density_g_cm3: 8.57, electronegativity: 1.60, description_th: "โลหะทรานซิชันที่ใช้ในโลหะผสมและแม่เหล็กตัวนำยิ่งยวด" },
+            { name_th: "โมลิบดีนัม", symbol: "Mo", atomic_number: 42, atomic_mass: 95.95, category: "transition-metal", group: 6, period: 5, x: 6, y: 5, electron_configuration: "[Kr] 4d⁵ 5s¹", melting_point_c: 2623, boiling_point_c: 4639, density_g_cm3: 10.28, electronegativity: 2.16, description_th: "โลหะทรานซิชันที่ใช้ในโลหะผสมที่มีความแข็งแรงสูง" },
+            { name_th: "เทคเนเทียม", symbol: "Tc", atomic_number: 43, atomic_mass: 98.907, category: "transition-metal", group: 7, period: 5, x: 7, y: 5, electron_configuration: "[Kr] 4d⁵ 5s²", melting_point_c: 2157, boiling_point_c: 4265, density_g_cm3: 11.5, electronegativity: 1.90, description_th: "ธาตุกัมมันตรังสีที่เบาที่สุด ไม่มีไอโซโทปที่เสถียร" },
+            { name_th: "รูทีเนียม", symbol: "Ru", atomic_number: 44, atomic_mass: 101.07, category: "transition-metal", group: 8, period: 5, x: 8, y: 5, electron_configuration: "[Kr] 4d⁷ 5s¹", melting_point_c: 2334, boiling_point_c: 4150, density_g_cm3: 12.45, electronegativity: 2.20, description_th: "โลหะทรานซิชันในกลุ่มแพลทินัม ใช้ในหน้าสัมผัสไฟฟ้า" },
+            { name_th: "โรเดียม", symbol: "Rh", atomic_number: 45, atomic_mass: 102.906, category: "transition-metal", group: 9, period: 5, x: 9, y: 5, electron_configuration: "[Kr] 4d⁸ 5s¹", melting_point_c: 1964, boiling_point_c: 3695, density_g_cm3: 12.41, electronegativity: 2.28, description_th: "โลหะทรานซิชันที่หายากและมีค่า ใช้ในตัวเร่งปฏิกิริยา" },
+            { name_th: "พัลลาเดียม", symbol: "Pd", atomic_number: 46, atomic_mass: 106.42, category: "transition-metal", group: 10, period: 5, x: 10, y: 5, electron_configuration: "[Kr] 4d¹⁰", melting_point_c: 1554.9, boiling_point_c: 2963, density_g_cm3: 12.02, electronegativity: 2.20, description_th: "โลหะทรานซิชันที่ใช้ในตัวเร่งปฏิกิริยาและอิเล็กทรอนิกส์" },
+            { name_th: "เงิน", symbol: "Ag", atomic_number: 47, atomic_mass: 107.868, category: "transition-metal", group: 11, period: 5, x: 11, y: 5, electron_configuration: "[Kr] 4d¹⁰ 5s¹", melting_point_c: 961.78, boiling_point_c: 2162, density_g_cm3: 10.49, electronegativity: 1.93, description_th: "โลหะมีค่าที่นำไฟฟ้าและนำความร้อนได้ดีที่สุด ใช้ในเครื่องประดับและอิเล็กทรอนิกส์" },
+            { name_th: "แคดเมียม", symbol: "Cd", atomic_number: 48, atomic_mass: 112.414, category: "post-transition-metal", group: 12, period: 5, x: 12, y: 5, electron_configuration: "[Kr] 4d¹⁰ 5s²", melting_point_c: 321.07, boiling_point_c: 767, density_g_cm3: 8.65, electronegativity: 1.69, description_th: "โลหะที่เป็นพิษ ใช้ในแบตเตอรี่และเม็ดสี" },
+            { name_th: "อินเดียม", symbol: "In", atomic_number: 49, atomic_mass: 114.818, category: "post-transition-metal", group: 13, period: 5, x: 13, y: 5, electron_configuration: "[Kr] 4d¹⁰ 5s² 5p¹", melting_point_c: 156.6, boiling_point_c: 2072, density_g_cm3: 7.31, electronegativity: 1.78, description_th: "โลหะอ่อนนุ่มที่มีจุดหลอมเหลวต่ำ ใช้ในจอ LCD และโลหะผสม" },
+            { name_th: "ดีบุก", symbol: "Sn", atomic_number: 50, atomic_mass: 118.710, category: "post-transition-metal", group: 14, period: 5, x: 14, y: 5, electron_configuration: "[Kr] 4d¹⁰ 5s² 5p²", melting_point_c: 231.93, boiling_point_c: 2602, density_g_cm3: 7.26, electronegativity: 1.96, description_th: "โลหะที่ใช้ในการชุบโลหะและโลหะบัดกรี" },
+            { name_th: "พลวง", symbol: "Sb", atomic_number: 51, atomic_mass: 121.760, category: "metalloid", group: 15, period: 5, x: 15, y: 5, electron_configuration: "[Kr] 4d¹⁰ 5s² 5p³", melting_point_c: 630.63, boiling_point_c: 1587, density_g_cm3: 6.697, electronegativity: 2.05, description_th: "กึ่งโลหะที่ใช้ในโลหะผสมและสารกึ่งตัวนำ" },
+            { name_th: "เทลลูเรียม", symbol: "Te", atomic_number: 52, atomic_mass: 127.60, category: "metalloid", group: 16, period: 5, x: 16, y: 5, electron_configuration: "[Kr] 4d¹⁰ 5s² 5p⁴", melting_point_c: 449.5, boiling_point_c: 988, density_g_cm3: 6.24, electronegativity: 2.10, description_th: "กึ่งโลหะที่ใช้ในสารกึ่งตัวนำและออปติก" },
+            { name_th: "ไอโอดีน", symbol: "I", atomic_number: 53, atomic_mass: 126.904, category: "halogen", group: 17, period: 5, x: 17, y: 5, electron_configuration: "[Kr] 4d¹⁰ 5s² 5p⁵", melting_point_c: 113.7, boiling_point_c: 184.3, density_g_cm3: 4.93, electronegativity: 2.66, description_th: "ของแข็งฮาโลเจนสีม่วงดำ ระเหิดได้ ใช้ในน้ำยาฆ่าเชื้อ" },
+            { name_th: "ซีนอน", symbol: "Xe", atomic_number: 54, atomic_mass: 131.293, category: "noble-gas", group: 18, period: 5, x: 18, y: 5, electron_configuration: "[Kr] 4d¹⁰ 5s² 5p⁶", melting_point_c: -111.7, boiling_point_c: -108.09, density_g_cm3: 0.005894, electronegativity: 2.60, description_th: "ก๊าซเฉื่อยที่ใช้ในหลอดไฟแฟลชและระบบขับเคลื่อนด้วยไอออน" },
+
+            // Period 6 (including La, then skip for f-block, then Hf-Rn)
+            { name_th: "ซีเซียม", symbol: "Cs", atomic_number: 55, atomic_mass: 132.905, category: "alkali-metal", group: 1, period: 6, x: 1, y: 6, electron_configuration: "[Xe] 6s¹", melting_point_c: 28.44, boiling_point_c: 671, density_g_cm3: 1.879, electronegativity: 0.79, description_th: "โลหะอัลคาไลที่มีปฏิกิริยามากที่สุด ใช้ในนาฬิกาอะตอม" },
+            { name_th: "แบเรียม", symbol: "Ba", atomic_number: 56, atomic_mass: 137.327, category: "alkaline-earth-metal", group: 2, period: 6, x: 2, y: 6, electron_configuration: "[Xe] 6s²", melting_point_c: 727, boiling_point_c: 1897, density_g_cm3: 3.51, electronegativity: 0.89, description_th: "โลหะอัลคาไลน์เอิร์ธที่ให้เปลวไฟสีเขียว ใช้ในการถ่ายภาพรังสีทางการแพทย์" },
+            { name_th: "แลนทานัม", symbol: "La", atomic_number: 57, atomic_mass: 138.906, category: "lanthanide", group: 3, period: 6, x: 3, y: 6, electron_configuration: "[Xe] 5d¹ 6s²", melting_point_c: 920, boiling_point_c: 3464, density_g_cm3: 6.162, electronegativity: 1.10, description_th: "โลหะหายากจากโลก เป็นโลหะแลนทาไนด์ตัวแรก ใช้ในเลนส์กล้องและแบตเตอรี่" },
+            // Lanthanides (58-71) will be placed in y:8
+            { name_th: "แฮฟเนียม", symbol: "Hf", atomic_number: 72, atomic_mass: 178.49, category: "transition-metal", group: 4, period: 6, x: 4, y: 6, electron_configuration: "[Xe] 4f¹⁴ 5d² 6s²", melting_point_c: 2233, boiling_point_c: 4603, density_g_cm3: 13.31, electronegativity: 1.30, description_th: "โลหะทรานซิชันที่ทนทานต่อการกัดกร่อน ใช้ในแท่งควบคุมเตาปฏิกรณ์นิวเคลียร์" },
+            { name_th: "แทนทาลัม", symbol: "Ta", atomic_number: 73, atomic_mass: 180.948, category: "transition-metal", group: 5, period: 6, x: 5, y: 6, electron_configuration: "[Xe] 4f¹⁴ 5d³ 6s²", melting_point_c: 3017, boiling_point_c: 5458, density_g_cm3: 16.69, electronegativity: 1.50, description_th: "โลหะทรานซิชันสีเทาฟ้า ทนต่อการกัดกร่อน ใช้ในอุปกรณ์อิเล็กทรอนิกส์" },
+            { name_th: "ทังสเตน", symbol: "W", atomic_number: 74, atomic_mass: 183.84, category: "transition-metal", group: 6, period: 6, x: 6, y: 6, electron_configuration: "[Xe] 4f¹⁴ 5d⁴ 6s²", melting_point_c: 3422, boiling_point_c: 5930, density_g_cm3: 19.25, electronegativity: 2.36, description_th: "โลหะที่มีจุดหลอมเหลวสูงสุด มีความแข็งสูง ใช้ในไส้หลอดไฟและเครื่องมือตัด" },
+            { name_th: "รีเนียม", symbol: "Re", atomic_number: 75, atomic_mass: 186.207, category: "transition-metal", group: 7, period: 6, x: 7, y: 6, electron_configuration: "[Xe] 4f¹⁴ 5d⁵ 6s²", melting_point_c: 3186, boiling_point_c: 5596, density_g_cm3: 21.02, electronegativity: 1.90, description_th: "โลหะทรานซิชันหายาก ใช้ในเครื่องยนต์ไอพ่นและเตาเผา" },
+            { name_th: "ออสเมียม", symbol: "Os", atomic_number: 76, atomic_mass: 190.23, category: "transition-metal", group: 8, period: 6, x: 8, y: 6, electron_configuration: "[Xe] 4f¹⁴ 5d⁶ 6s²", melting_point_c: 3033, boiling_point_c: 5012, density_g_cm3: 22.59, electronegativity: 2.20, description_th: "โลหะทรานซิชันที่มีความหนาแน่นสูงสุด ใช้ในปลายปากกาและเครื่องมือที่มีความแม่นยำสูง" },
+            { name_th: "อิริเดียม", symbol: "Ir", atomic_number: 77, atomic_mass: 192.217, category: "transition-metal", group: 9, period: 6, x: 9, y: 6, electron_configuration: "[Xe] 4f¹⁴ 5d⁷ 6s²", melting_point_c: 2466, boiling_point_c: 4428, density_g_cm3: 22.56, electronegativity: 2.20, description_th: "โลหะทรานซิชันที่ทนการกัดกร่อนมากที่สุด ใช้ในปลายหัวเทียนและอุปกรณ์ไฟฟ้า" },
+            { name_th: "แพลทินัม", symbol: "Pt", atomic_number: 78, atomic_mass: 195.084, category: "transition-metal", group: 10, period: 6, x: 10, y: 6, electron_configuration: "[Xe] 4f¹⁴ 5d⁹ 6s¹", melting_point_c: 1768.3, boiling_point_c: 3825, density_g_cm3: 21.45, electronegativity: 2.28, description_th: "โลหะมีค่าหายาก ทนต่อการกัดกร่อน ใช้ในเครื่องประดับและตัวเร่งปฏิกิริยา" },
+            { name_th: "ทองคำ", symbol: "Au", atomic_number: 79, atomic_mass: 196.967, category: "transition-metal", group: 11, period: 6, x: 11, y: 6, electron_configuration: "[Xe] 4f¹⁴ 5d¹⁰ 6s¹", melting_point_c: 1064.18, boiling_point_c: 2856, density_g_cm3: 19.3, electronegativity: 2.54, description_th: "โลหะมีค่าที่มีความทนทานต่อการกัดกร่อนสูง ใช้ในเครื่องประดับและการลงทุน" },
+            { name_th: "ปรอท", symbol: "Hg", atomic_number: 80, atomic_mass: 200.59, category: "post-transition-metal", group: 12, period: 6, x: 12, y: 6, electron_configuration: "[Xe] 4f¹⁴ 5d¹⁰ 6s²", melting_point_c: -38.83, boiling_point_c: 356.73, density_g_cm3: 13.534, electronegativity: 2.00, description_th: "โลหะเหลวเพียงชนิดเดียวที่อุณหภูมิห้อง เป็นพิษ ใช้ในเทอร์โมมิเตอร์รุ่นเก่า" },
+            { name_th: "ทัลเลียม", symbol: "Tl", atomic_number: 81, atomic_mass: 204.383, category: "post-transition-metal", group: 13, period: 6, x: 13, y: 6, electron_configuration: "[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p¹", melting_point_c: 303.03, boiling_point_c: 1473, density_g_cm3: 11.85, electronegativity: 1.62, description_th: "โลหะหนักที่เป็นพิษ ใช้ในโฟโตเซลล์และเครื่องตรวจจับรังสีอินฟราเรด" },
+            { name_th: "ตะกั่ว", symbol: "Pb", atomic_number: 82, atomic_mass: 207.2, category: "post-transition-metal", group: 14, period: 6, x: 14, y: 6, electron_configuration: "[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p²", melting_point_c: 327.46, boiling_point_c: 1749, density_g_cm3: 11.34, electronegativity: 1.87, description_th: "โลหะหนักที่มีความหนาแน่นสูง เป็นพิษ ใช้ในแบตเตอรี่และรังสีป้องกัน" },
+            { name_th: "บิสมัท", symbol: "Bi", atomic_number: 83, atomic_mass: 208.980, category: "post-transition-metal", group: 15, period: 6, x: 15, y: 6, electron_configuration: "[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p³", melting_point_c: 271.4, boiling_point_c: 1564, density_g_cm3: 9.78, electronegativity: 2.02, description_th: "โลหะหนักที่มีคุณสมบัติเป็นแม่เหล็ก พบในยาแก้ปวดท้อง" },
+            { name_th: "โพโลเนียม", symbol: "Po", atomic_number: 84, atomic_mass: 208.982, category: "metalloid", group: 16, period: 6, x: 16, y: 6, electron_configuration: "[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p⁴", melting_point_c: 254, boiling_point_c: 962, density_g_cm3: 9.196, electronegativity: 2.00, description_th: "ธาตุกัมมันตรังสีที่หายากและเป็นพิษอย่างยิ่ง" },
+            { name_th: "แอสทาทีน", symbol: "At", atomic_number: 85, atomic_mass: 209.987, category: "halogen", group: 17, period: 6, x: 17, y: 6, electron_configuration: "[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p⁵", melting_point_c: 302, boiling_point_c: 337, density_g_cm3: 7.0, electronegativity: 2.20, description_th: "ธาตุฮาโลเจนกัมมันตรังสีที่หายากมากและไม่เสถียร" },
+            { name_th: "เรดอน", symbol: "Rn", atomic_number: 86, atomic_mass: 222.018, category: "noble-gas", group: 18, period: 6, x: 18, y: 6, electron_configuration: "[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p⁶", melting_point_c: -71, boiling_point_c: -61.7, density_g_cm3: 0.00973, electronegativity: 2.20, description_th: "ก๊าซเฉื่อยกัมมันตรังสี พบในธรรมชาติจากการสลายตัวของยูเรเนียม" },
+
+            // Period 7 (including Ac, then skip for f-block, then Rf-Og)
+            { name_th: "แฟรนเซียม", symbol: "Fr", atomic_number: 87, atomic_mass: 223.020, category: "alkali-metal", group: 1, period: 7, x: 1, y: 7, electron_configuration: "[Rn] 7s¹", melting_point_c: 27, boiling_point_c: 677, density_g_cm3: 1.87, electronegativity: 0.79, description_th: "โลหะอัลคาไลกัมมันตรังสี หายากมากและไม่เสถียร" },
+            { name_th: "เรเดียม", symbol: "Ra", atomic_number: 88, atomic_mass: 226.025, category: "alkaline-earth-metal", group: 2, period: 7, x: 2, y: 7, electron_configuration: "[Rn] 7s²", melting_point_c: 700, boiling_point_c: 1737, density_g_cm3: 5.5, electronegativity: 0.90, description_th: "โลหะอัลคาไลน์เอิร์ธกัมมันตรังสีที่ค้นพบโดยมารี กูรี" },
+            { name_th: "แอกทิเนียม", symbol: "Ac", atomic_number: 89, atomic_mass: 227.028, category: "actinide", group: 3, period: 7, x: 3, y: 7, electron_configuration: "[Rn] 6d¹ 7s²", melting_point_c: 1050, boiling_point_c: 3200, density_g_cm3: 10.07, electronegativity: 1.10, description_th: "โลหะแอคทิไนด์กัมมันตรังสีตัวแรก ใช้ในทางการแพทย์" },
+            // Actinides (90-103) will be placed in y:9
+            { name_th: "รัสเทอร์ฟอร์เดียม", symbol: "Rf", atomic_number: 104, atomic_mass: 267.122, category: "transition-metal", group: 4, period: 7, x: 4, y: 7, electron_configuration: "[Rn] 5f¹⁴ 6d² 7s²", melting_point_c: 2100, boiling_point_c: 5500, density_g_cm3: 23.2, electronegativity: null, description_th: "ธาตุสังเคราะห์ กัมมันตรังสีสูงและไม่เสถียร" },
+            { name_th: "ดับเนียม", symbol: "Db", atomic_number: 105, atomic_mass: 268.125, category: "transition-metal", group: 5, period: 7, x: 5, y: 7, electron_configuration: "[Rn] 5f¹⁴ 6d³ 7s²", melting_point_c: 2000, boiling_point_c: 5000, density_g_cm3: 29.3, electronegativity: null, description_th: "ธาตุสังเคราะห์ กัมมันตรังสีสูงและไม่เสถียร" },
+            { name_th: "ซีบอร์เกียม", symbol: "Sg", atomic_number: 106, atomic_mass: 269.13, category: "transition-metal", group: 6, period: 7, x: 6, y: 7, electron_configuration: "[Rn] 5f¹⁴ 6d⁴ 7s²", melting_point_c: 2500, boiling_point_c: 5000, density_g_cm3: 35.0, electronegativity: null, description_th: "ธาตุสังเคราะห์ กัมมันตรังสีสูงและไม่เสถียร" },
+            { name_th: "โบเรียม", symbol: "Bh", atomic_number: 107, atomic_mass: 270.134, category: "transition-metal", group: 7, period: 7, x: 7, y: 7, electron_configuration: "[Rn] 5f¹⁴ 6d⁵ 7s²", melting_point_c: 2600, boiling_point_c: 5000, density_g_cm3: 37.1, electronegativity: null, description_th: "ธาตุสังเคราะห์ กัมมันตรังสีสูงและไม่เสถียร" },
+            { name_th: "ฮัสเซียม", symbol: "Hs", atomic_number: 108, atomic_mass: 277.152, category: "transition-metal", group: 8, period: 7, x: 8, y: 7, electron_configuration: "[Rn] 5f¹⁴ 6d⁶ 7s²", melting_point_c: 2700, boiling_point_c: 5000, density_g_cm3: 40.7, electronegativity: null, description_th: "ธาตุสังเคราะห์ กัมมันตรังสีสูงและไม่เสถียร" },
+            { name_th: "ไมต์เนเรียม", symbol: "Mt", atomic_number: 109, atomic_mass: 276.151, category: "transition-metal", group: 9, period: 7, x: 9, y: 7, electron_configuration: "[Rn] 5f¹⁴ 6d⁷ 7s²", melting_point_c: 2800, boiling_point_c: 5000, density_g_cm3: 37.4, electronegativity: null, description_th: "ธาตุสังเคราะห์ กัมมันตรังสีสูงและไม่เสถียร" },
+            { name_th: "ดาร์มสตัดเทียม", symbol: "Ds", atomic_number: 110, atomic_mass: 281.164, category: "transition-metal", group: 10, period: 7, x: 10, y: 7, electron_configuration: "[Rn] 5f¹⁴ 6d⁸ 7s²", melting_point_c: 2900, boiling_point_c: 5000, density_g_cm3: 34.8, electronegativity: null, description_th: "ธาตุสังเคราะห์ กัมมันตรังสีสูงและไม่เสถียร" },
+            { name_th: "เรินต์เกเนียม", symbol: "Rg", atomic_number: 111, atomic_mass: 282.169, category: "transition-metal", group: 11, period: 7, x: 11, y: 7, electron_configuration: "[Rn] 5f¹⁴ 6d⁹ 7s²", melting_point_c: 2800, boiling_point_c: 5000, density_g_cm3: 28.7, electronegativity: null, description_th: "ธาตุสังเคราะห์ กัมมันตรังสีสูงและไม่เสถียร" },
+            { name_th: "โคเปอร์นิเซียม", symbol: "Cn", atomic_number: 112, atomic_mass: 285.177, category: "post-transition-metal", group: 12, period: 7, x: 12, y: 7, electron_configuration: "[Rn] 5f¹⁴ 6d¹⁰ 7s²", melting_point_c: 10, boiling_point_c: 80, density_g_cm3: 23.7, electronegativity: null, description_th: "ธาตุสังเคราะห์ ก๊าซที่อุณหภูมิห้อง คาดว่าจะเป็นโลหะหลังทรานซิชัน" },
+            { name_th: "นีโฮเนียม", symbol: "Nh", atomic_number: 113, atomic_mass: 286, category: "post-transition-metal", group: 13, period: 7, x: 13, y: 7, electron_configuration: "[Rn] 5f¹⁴ 6d¹⁰ 7s² 7p¹", melting_point_c: 430, boiling_point_c: 1130, density_g_cm3: 16.0, electronegativity: null, description_th: "ธาตุสังเคราะห์ที่มีเลขอะตอม 113 กัมมันตรังสีสูงและไม่เสถียร" },
+            { name_th: "เฟลโรเวียม", symbol: "Fl", atomic_number: 114, atomic_mass: 289, category: "post-transition-metal", group: 14, period: 7, x: 14, y: 7, electron_configuration: "[Rn] 5f¹⁴ 6d¹⁰ 7s² 7p²", melting_point_c: 70, boiling_point_c: 150, density_g_cm3: 14.0, electronegativity: null, description_th: "ธาตุสังเคราะห์ คาดว่าจะเป็นก๊าซหรือของเหลวโลหะ" },
+            { name_th: "มอสโกเวียม", symbol: "Mc", atomic_number: 115, atomic_mass: 290, category: "post-transition-metal", group: 15, period: 7, x: 15, y: 7, electron_configuration: "[Rn] 5f¹⁴ 6d¹⁰ 7s² 7p³", melting_point_c: 400, boiling_point_c: 1100, density_g_cm3: 13.5, electronegativity: null, description_th: "ธาตุสังเคราะห์ กัมมันตรังสีสูงและไม่เสถียร" },
+            { name_th: "ลิเวอร์โมเรียม", symbol: "Lv", atomic_number: 116, atomic_mass: 293, category: "post-transition-metal", group: 16, period: 7, x: 16, y: 7, electron_configuration: "[Rn] 5f¹⁴ 6d¹⁰ 7s² 7p⁴", melting_point_c: 200, boiling_point_c: 350, density_g_cm3: 12.9, electronegativity: null, description_th: "ธาตุสังเคราะห์ คาดว่าจะเป็นโลหะหลังทรานซิชัน" },
+            { name_th: "เทนเนสซีน", symbol: "Ts", atomic_number: 117, atomic_mass: 294, category: "halogen", group: 17, period: 7, x: 17, y: 7, electron_configuration: "[Rn] 5f¹⁴ 6d¹⁰ 7s² 7p⁵", melting_point_c: 350, boiling_point_c: 610, density_g_cm3: 7.18, electronegativity: null, description_th: "ธาตุสังเคราะห์ฮาโลเจน กัมมันตรังสีสูงมากและไม่เสถียร" },
+            { name_th: "ออกาเนสซอน", symbol: "Og", atomic_number: 118, atomic_mass: 294, category: "noble-gas", group: 18, period: 7, x: 18, y: 7, electron_configuration: "[Rn] 5f¹⁴ 6d¹⁰ 7s² 7p⁶", melting_point_c: 52, boiling_point_c: 350, density_g_cm3: 0.016, electronegativity: null, description_th: "ธาตุสังเคราะห์ที่มีเลขอะตอมสูงสุดที่เคยสร้างขึ้น คาดว่าจะเป็นก๊าซเฉื่อย" },
+            
+            // Lanthanides (f-block from Z=58 to Z=71, y:8)
+            { name_th: "ซีเรียม", symbol: "Ce", atomic_number: 58, atomic_mass: 140.116, category: "lanthanide", group: null, period: 6, x: 4, y: 8, electron_configuration: "[Xe] 4f¹ 5d¹ 6s²", melting_point_c: 795, boiling_point_c: 3443, density_g_cm3: 6.77, electronegativity: 1.12, description_th: "โลหะแลนทาไนด์ที่ใช้ในตัวเร่งปฏิกิริยาและสารขัดเงา" },
+            { name_th: "เพรซีโอดิเมียม", symbol: "Pr", atomic_number: 59, atomic_mass: 140.908, category: "lanthanide", group: null, period: 6, x: 5, y: 8, electron_configuration: "[Xe] 4f³ 6s²", melting_point_c: 935, boiling_point_c: 3520, density_g_cm3: 6.77, electronegativity: 1.13, description_th: "โลหะแลนทาไนด์ที่ใช้ในเลเซอร์และแก้วย้อมสี" },
+            { name_th: "นีโอดิเมียม", symbol: "Nd", atomic_number: 60, atomic_mass: 144.242, category: "lanthanide", group: null, period: 6, x: 6, y: 8, electron_configuration: "[Xe] 4f⁴ 6s²", melting_point_c: 1021, boiling_point_c: 3074, density_g_cm3: 7.01, electronegativity: 1.14, description_th: "โลหะแลนทาไนด์ที่ใช้ในแม่เหล็กถาวรและเลเซอร์" },
+            { name_th: "โปรมีเทียม", symbol: "Pm", atomic_number: 61, atomic_mass: 144.913, category: "lanthanide", group: null, period: 6, x: 7, y: 8, electron_configuration: "[Xe] 4f⁵ 6s²", melting_point_c: 1042, boiling_point_c: 3000, density_g_cm3: 7.26, electronegativity: 1.13, description_th: "โลหะแลนทาไนด์กัมมันตรังสี หายากมาก" },
+            { name_th: "ซาแมเรียม", symbol: "Sm", atomic_number: 62, atomic_mass: 150.36, category: "lanthanide", group: null, period: 6, x: 8, y: 8, electron_configuration: "[Xe] 4f⁶ 6s²", melting_point_c: 1074, boiling_point_c: 1794, density_g_cm3: 7.52, electronegativity: 1.17, description_th: "โลหะแลนทาไนด์ที่ใช้ในแม่เหล็กและแท่งควบคุมนิวเคลียร์" },
+            { name_th: "ยูโรเพียม", symbol: "Eu", atomic_number: 63, atomic_mass: 151.964, category: "lanthanide", group: null, period: 6, x: 9, y: 8, electron_configuration: "[Xe] 4f⁷ 6s²", melting_point_c: 822, boiling_point_c: 1529, density_g_cm3: 5.24, electronegativity: 1.20, description_th: "โลหะแลนทาไนด์ที่ใช้ในสารเรืองแสงและตัวตรวจจับนิวตรอน" },
+            { name_th: "กาโดลิเนียม", symbol: "Gd", atomic_number: 64, atomic_mass: 157.25, category: "lanthanide", group: null, period: 6, x: 10, y: 8, electron_configuration: "[Xe] 4f⁷ 5d¹ 6s²", melting_point_c: 1312, boiling_point_c: 3273, density_g_cm3: 7.90, electronegativity: 1.20, description_th: "โลหะแลนทาไนด์ที่ใช้ใน MRI และแท่งควบคุมนิวเคลียร์" },
+            { name_th: "เทอร์เบียม", symbol: "Tb", atomic_number: 65, atomic_mass: 158.925, category: "lanthanide", group: null, period: 6, x: 11, y: 8, electron_configuration: "[Xe] 4f⁹ 6s²", melting_point_c: 1356, boiling_point_c: 3230, density_g_cm3: 8.23, electronegativity: 1.20, description_th: "โลหะแลนทาไนด์ที่ใช้ในหลอดฟลูออเรสเซนต์และอุปกรณ์แม่เหล็ก" },
+            { name_th: "ดิสโพรเซียม", symbol: "Dy", atomic_number: 66, atomic_mass: 162.500, category: "lanthanide", group: null, period: 6, x: 12, y: 8, electron_configuration: "[Xe] 4f¹⁰ 6s²", melting_point_c: 1407, boiling_point_c: 2567, density_g_cm3: 8.55, electronegativity: 1.22, description_th: "โลหะแลนทาไนด์ที่ใช้ในแม่เหล็กและอุปกรณ์เก็บข้อมูล" },
+            { name_th: "โฮลเมียม", symbol: "Ho", atomic_number: 67, atomic_mass: 164.930, category: "lanthanide", group: null, period: 6, x: 13, y: 8, electron_configuration: "[Xe] 4f¹¹ 6s²", melting_point_c: 1474, boiling_point_c: 2695, density_g_cm3: 8.79, electronegativity: 1.23, description_th: "โลหะแลนทาไนด์ที่ใช้ในเลเซอร์และตัวกรองแสง" },
+            { name_th: "เออร์เบียม", symbol: "Er", atomic_number: 68, atomic_mass: 167.259, category: "lanthanide", group: null, period: 6, x: 14, y: 8, electron_configuration: "[Xe] 4f¹² 6s²", melting_point_c: 1529, boiling_point_c: 2868, density_g_cm3: 9.07, electronegativity: 1.24, description_th: "โลหะแลนทาไนด์ที่ใช้ในใยแก้วนำแสงและเลเซอร์" },
+            { name_th: "ทูเลียม", symbol: "Tm", atomic_number: 69, atomic_mass: 168.934, category: "lanthanide", group: null, period: 6, x: 15, y: 8, electron_configuration: "[Xe] 4f¹³ 6s²", melting_point_c: 1545, boiling_point_c: 1950, density_g_cm3: 9.32, electronegativity: 1.25, description_th: "โลหะแลนทาไนด์ที่ใช้ในการรักษาโรคมะเร็งและเลเซอร์" },
+            { name_th: "อิตเทอร์เบียม", symbol: "Yb", atomic_number: 70, atomic_mass: 173.045, category: "lanthanide", group: null, period: 6, x: 16, y: 8, electron_configuration: "[Xe] 4f¹⁴ 6s²", melting_point_c: 819, boiling_point_c: 1196, density_g_cm3: 6.90, electronegativity: 1.10, description_th: "โลหะแลนทาไนด์ที่ใช้ในเลเซอร์และเครื่องมือวัดความตึง" },
+            { name_th: "ลูทีเทียม", symbol: "Lu", atomic_number: 71, atomic_mass: 174.966, category: "lanthanide", group: null, period: 6, x: 17, y: 8, electron_configuration: "[Xe] 4f¹⁴ 5d¹ 6s²", melting_point_c: 1663, boiling_point_c: 3402, density_g_cm3: 9.84, electronegativity: 1.27, description_th: "โลหะแลนทาไนด์ที่แข็งที่สุดและหนาแน่นที่สุด ใช้ในการวิจัย" },
+
+            // Actinides (f-block from Z=90 to Z=103, y:9)
+            { name_th: "ทอเรียม", symbol: "Th", atomic_number: 90, atomic_mass: 232.038, category: "actinide", group: null, period: 7, x: 4, y: 9, electron_configuration: "[Rn] 6d² 7s²", melting_point_c: 1750, boiling_point_c: 4788, density_g_cm3: 11.72, electronegativity: 1.30, description_th: "โลหะแอคทิไนด์กัมมันตรังสี ใช้ในเชื้อเพลิงนิวเคลียร์" },
+            { name_th: "โปรแทกทิเนียม", symbol: "Pa", atomic_number: 91, atomic_mass: 231.036, category: "actinide", group: null, period: 7, x: 5, y: 9, electron_configuration: "[Rn] 5f² 6d¹ 7s²", melting_point_c: 1572, boiling_point_c: 4027, density_g_cm3: 15.37, electronegativity: 1.50, description_th: "โลหะแอคทิไนด์กัมมันตรังสีที่หายากและเป็นพิษอย่างยิ่ง" },
+            { name_th: "ยูเรเนียม", symbol: "U", atomic_number: 92, atomic_mass: 238.029, category: "actinide", group: null, period: 7, x: 6, y: 9, electron_configuration: "[Rn] 5f³ 6d¹ 7s²", melting_point_c: 1132.2, boiling_point_c: 4131, density_g_cm3: 19.05, electronegativity: 1.38, description_th: "โลหะแอคทิไนด์กัมมันตรังสีที่ใช้เป็นเชื้อเพลิงในโรงไฟฟ้านิวเคลียร์และอาวุธนิวเคลียร์" },
+            { name_th: "เนปทูเนียม", symbol: "Np", atomic_number: 93, atomic_mass: 237.048, category: "actinide", group: null, period: 7, x: 7, y: 9, electron_configuration: "[Rn] 5f⁴ 6d¹ 7s²", melting_point_c: 639, boiling_point_c: 4000, density_g_cm3: 20.45, electronegativity: 1.36, description_th: "โลหะแอคทิไนด์กัมมันตรังสีที่ผลิตขึ้นเอง" },
+            { name_th: "พลูโตเนียม", symbol: "Pu", atomic_number: 94, atomic_mass: 244.064, category: "actinide", group: null, period: 7, x: 8, y: 9, electron_configuration: "[Rn] 5f⁶ 7s²", melting_point_c: 639, boiling_point_c: 3228, density_g_cm3: 19.816, electronegativity: 1.28, description_th: "โลหะแอคทิไนด์กัมมันตรังสี เป็นสารสำคัญในอาวุธนิวเคลียร์" },
+            { name_th: "อะเมริเซียม", symbol: "Am", atomic_number: 95, atomic_mass: 243.061, category: "actinide", group: null, period: 7, x: 9, y: 9, electron_configuration: "[Rn] 5f⁷ 7s²", melting_point_c: 1176, boiling_point_c: 2607, density_g_cm3: 13.67, electronegativity: 1.30, description_th: "โลหะแอคทิไนด์กัมมันตรังสี ใช้ในเครื่องตรวจจับควัน" },
+            { name_th: "คูเรียม", symbol: "Cm", atomic_number: 96, atomic_mass: 247.070, category: "actinide", group: null, period: 7, x: 10, y: 9, electron_configuration: "[Rn] 5f⁷ 6d¹ 7s²", melting_point_c: 1340, boiling_point_c: 3100, density_g_cm3: 13.51, electronegativity: 1.30, description_th: "โลหะแอคทิไนด์กัมมันตรังสี ใช้ในเครื่องกำเนิดไฟฟ้าพลังงานไอโซโทป" },
+            { name_th: "เบอร์คีเลียม", symbol: "Bk", atomic_number: 97, atomic_mass: 247.070, category: "actinide", group: null, period: 7, x: 11, y: 9, electron_configuration: "[Rn] 5f⁹ 7s²", melting_point_c: 1050, boiling_point_c: 2900, density_g_cm3: 14.78, electronegativity: 1.30, description_th: "โลหะแอคทิไนด์กัมมันตรังสีที่สังเคราะห์ขึ้น" },
+            { name_th: "แคลิฟอร์เนียม", symbol: "Cf", atomic_number: 98, atomic_mass: 251.080, category: "actinide", group: null, period: 7, x: 12, y: 9, electron_configuration: "[Rn] 5f¹⁰ 7s²", melting_point_c: 900, boiling_point_c: 1470, density_g_cm3: 15.1, electronegativity: 1.30, description_th: "โลหะแอคทิไนด์กัมมันตรังสี ใช้ในเครื่องปฏิกรณ์นิวเคลียร์ขนาดเล็ก" },
+            { name_th: "ไอน์สไตเนียม", symbol: "Es", atomic_number: 99, atomic_mass: 252.083, category: "actinide", group: null, period: 7, x: 13, y: 9, electron_configuration: "[Rn] 5f¹¹ 7s²", melting_point_c: 860, boiling_point_c: 996, density_g_cm3: 13.5, electronegativity: 1.30, description_th: "โลหะแอคทิไนด์กัมมันตรังสีที่สังเคราะห์ขึ้น" },
+            { name_th: "เฟอร์เมียม", symbol: "Fm", atomic_number: 100, atomic_mass: 257.095, category: "actinide", group: null, period: 7, x: 14, y: 9, electron_configuration: "[Rn] 5f¹² 7s²", melting_point_c: 1527, boiling_point_c: 2000, density_g_cm3: 13.5, electronegativity: 1.30, description_th: "โลหะแอคทิไนด์กัมมันตรังสีที่สังเคราะห์ขึ้น" },
+            { name_th: "เมนเดลีเวียม", symbol: "Md", atomic_number: 101, atomic_mass: 258.098, category: "actinide", group: null, period: 7, x: 15, y: 9, electron_configuration: "[Rn] 5f¹³ 7s²", melting_point_c: 827, boiling_point_c: 1000, density_g_cm3: 10.3, electronegativity: 1.30, description_th: "โลหะแอคทิไนด์กัมมันตรังสีที่สังเคราะห์ขึ้น" },
+            { name_th: "โนเบเลียม", symbol: "No", atomic_number: 102, atomic_mass: 259.101, category: "actinide", group: null, period: 7, x: 16, y: 9, electron_configuration: "[Rn] 5f¹⁴ 7s²", melting_point_c: 827, boiling_point_c: 1000, density_g_cm3: 9.9, electronegativity: 1.30, description_th: "โลหะแอคทิไนด์กัมมันตรังสีที่สังเคราะห์ขึ้น" },
+            { name_th: "โลว์เรนเซียม", symbol: "Lr", atomic_number: 103, atomic_mass: 262.110, category: "actinide", group: null, period: 7, x: 17, y: 9, electron_configuration: "[Rn] 5f¹⁴ 7s² 7p¹", melting_point_c: 1627, boiling_point_c: 1627, density_g_cm3: 15.6, electronegativity: null, description_th: "โลหะแอคทิไนด์สังเคราะห์ กัมมันตรังสีสูงและไม่เสถียร" }
+        ];
+
+        const categoryColors = {
+            "alkali-metal": "#FF6F61",
+            "alkaline-earth-metal": "#FFB84C",
+            "lanthanide": "#A2D2FF",
+            "actinide": "#B19CD9",
+            "transition-metal": "#8FBC8F",
+            "post-transition-metal": "#98D8AA",
+            "metalloid": "#C6E2EE",
+            "nonmetal": "#90EE90",
+            "halogen": "#FFD700",
+            "noble-gas": "#ADD8E6",
+            "unknown": "#D3D3D3"
+        };
+
+        const categoryNames = {
+            "alkali-metal": "โลหะอัลคาไล",
+            "alkaline-earth-metal": "โลหะอัลคาไลน์เอิร์ธ",
+            "lanthanide": "แลนทาไนด์",
+            "actinide": "แอกทิไนด์",
+            "transition-metal": "โลหะทรานซิชัน",
+            "post-transition-metal": "โลหะหลังทรานซิชัน",
+            "metalloid": "กึ่งโลหะ",
+            "nonmetal": "อโลหะ",
+            "halogen": "ฮาโลเจน",
+            "noble-gas": "ก๊าซเฉื่อย",
+            "unknown": "ไม่ทราบประเภท"
+        };
+
+        const periodicTable = document.getElementById('periodicTable');
+        const detailPanel = document.getElementById('detailPanel');
+        const legendItemsDiv = document.getElementById('legendItems');
+
+        const detailElements = {
+            symbol: document.getElementById('detailSymbol'),
+            atomicNumber: document.getElementById('detailAtomicNumber'),
+            name: document.getElementById('detailName'),
+            atomicMass: document.getElementById('detailAtomicMass'),
+            electronConfiguration: document.getElementById('detailElectronConfiguration'),
+            meltingPoint: document.getElementById('detailMeltingPoint'),
+            boilingPoint: document.getElementById('detailBoilingPoint'),
+            density: document.getElementById('detailDensity'),
+            group: document.getElementById('detailGroup'),
+            period: document.getElementById('detailPeriod'),
+            electronegativity: document.getElementById('detailElectronegativity'),
+            description: document.getElementById('detailDescription')
+        };
+
+        function displayElementDetails(element) {
+            detailElements.symbol.textContent = element.symbol;
+            detailElements.atomicNumber.textContent = element.atomic_number;
+            detailElements.name.textContent = element.name_th;
+            detailElements.atomicMass.textContent = element.atomic_mass ? element.atomic_mass.toFixed(3) : 'N/A';
+            detailElements.electronConfiguration.textContent = element.electron_configuration || 'N/A';
+            detailElements.meltingPoint.textContent = element.melting_point_c !== null ? `${element.melting_point_c}°C` : 'N/A';
+            detailElements.boilingPoint.textContent = element.boiling_point_c !== null ? `${element.boiling_point_c}°C` : 'N/A';
+            detailElements.density.textContent = element.density_g_cm3 !== null ? `${element.density_g_cm3} g/cm³` : 'N/A';
+            detailElements.group.textContent = element.group !== null ? element.group : 'N/A';
+            detailElements.period.textContent = element.period !== null ? element.period : 'N/A';
+            detailElements.electronegativity.textContent = element.electronegativity !== null ? element.electronegativity : 'N/A';
+            detailElements.description.textContent = element.description_th || 'ไม่มีข้อมูลคำอธิบาย';
+            
+            detailPanel.classList.add('visible');
+        }
+
+        function hideElementDetails() {
+            detailPanel.classList.remove('visible');
+        }
+
+        function createPeriodicTable() {
+            // Create placeholders for the main grid structure (18x9)
+            // This ensures grid layout is correct even if some spots are empty or filled by f-block series.
+            const maxRows = 9;
+            const maxCols = 18;
+            const elementMap = new Map(elementsData.map(el => [`${el.x}-${el.y}`, el]));
+
+            for (let r = 1; r <= maxRows; r++) {
+                for (let c = 1; c <= maxCols; c++) {
+                    const element = elementMap.get(`${c}-${r}`);
+                    if (element) {
+                        const cell = document.createElement('div');
+                        cell.classList.add('element-cell', element.category);
+                        cell.style.gridColumn = element.x;
+                        cell.style.gridRow = element.y;
+
+                        const atomicNumber = document.createElement('div');
+                        atomicNumber.classList.add('atomic-number');
+                        atomicNumber.textContent = element.atomic_number;
+                        cell.appendChild(atomicNumber);
+
+                        const symbol = document.createElement('div');
+                        symbol.classList.add('symbol');
+                        symbol.textContent = element.symbol;
+                        cell.appendChild(symbol);
+
+                        const name = document.createElement('div');
+                        name.classList.add('name');
+                        name.textContent = element.name_th;
+                        cell.appendChild(name);
+
+                        cell.addEventListener('mouseover', () => displayElementDetails(element));
+                        cell.addEventListener('mouseout', hideElementDetails);
+                        periodicTable.appendChild(cell);
+                    } else {
+                        // Create placeholder for empty cells
+                        const placeholder = document.createElement('div');
+                        placeholder.classList.add('element-placeholder');
+                        placeholder.style.gridColumn = c;
+                        placeholder.style.gridRow = r;
+
+                        // Add specific placeholders for the f-block series gaps in rows 6 and 7
+                        if (r === 6 && c === 3) {
+                            const fblockLink = document.createElement('a');
+                            fblockLink.href = "#"; // Could link to more info or just be decorative
+                            fblockLink.textContent = "57-71";
+                            placeholder.classList.remove('element-placeholder');
+                            placeholder.classList.add('fblock-placeholder');
+                            placeholder.appendChild(fblockLink);
+                            placeholder.addEventListener('mouseover', () => {
+                                detailPanel.innerHTML = '<h2 class="detail-name">แลนทาไนด์ (57-71)</h2><p class="detail-description">ธาตุในกลุ่มแลนทาไนด์ ซึ่งปกติจะแสดงอยู่ด้านล่างตารางธาตุหลัก เพื่อความกะทัดรัด</p>';
+                                detailPanel.classList.add('visible');
+                            });
+                            placeholder.addEventListener('mouseout', hideElementDetails);
+                        } else if (r === 7 && c === 3) {
+                            const fblockLink = document.createElement('a');
+                            fblockLink.href = "#";
+                            fblockLink.textContent = "89-103";
+                            placeholder.classList.remove('element-placeholder');
+                            placeholder.classList.add('fblock-placeholder', 'fblock-placeholder-actinides');
+                            placeholder.appendChild(fblockLink);
+                            placeholder.addEventListener('mouseover', () => {
+                                detailPanel.innerHTML = '<h2 class="detail-name">แอกทิไนด์ (89-103)</h2><p class="detail-description">ธาตุในกลุ่มแอกทิไนด์ ซึ่งปกติจะแสดงอยู่ด้านล่างตารางธาตุหลัก เพื่อความกะทัดรัด</p>';
+                                detailPanel.classList.add('visible');
+                            });
+                            placeholder.addEventListener('mouseout', hideElementDetails);
+                        }
+                        periodicTable.appendChild(placeholder);
+                    }
+                }
+            }
+        }
+
+        function createCategoryLegend() {
+            for (const categoryKey in categoryColors) {
+                if (categoryKey === 'unknown') continue; // Skip unknown from legend unless specifically needed
+
+                const legendItem = document.createElement('div');
+                legendItem.classList.add('legend-item');
+
+                const colorBox = document.createElement('div');
+                colorBox.classList.add('legend-color-box');
+                colorBox.style.backgroundColor = categoryColors[categoryKey];
+                
+                // For categories with white text, add a subtle border to the color box for visibility
+                if (['alkali-metal', 'actinide', 'transition-metal'].includes(categoryKey)) {
+                    colorBox.style.borderColor = '#999';
+                }
+
+                const categoryText = document.createElement('span');
+                categoryText.textContent = categoryNames[categoryKey] || categoryKey; // Fallback to key if name not found
+
+                legendItem.appendChild(colorBox);
+                legendItem.appendChild(categoryText);
+                legendItemsDiv.appendChild(legendItem);
+            }
+        }
+
+        createPeriodicTable();
+        createCategoryLegend();
+    </script>
+</body>
+</html>
