@@ -41,3 +41,4 @@ Feel free to remix, adapt, and share with attribution.
 
 ---
 ✨ Made with ❤️ by **Panya AI**
+ ⚡ Powered by JTIAPBN.Ai
