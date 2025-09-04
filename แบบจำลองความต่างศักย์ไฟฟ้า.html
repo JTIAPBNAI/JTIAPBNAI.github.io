@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>สรุปเรื่องไฟฟ้า: ความต่างศักย์และแหล่งกำเนิด</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap');
+
+        body {
+            font-family: 'Sarabun', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f4f8;
+            color: #333;
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 2.5em;
+        }
+
+        h2 {
+            color: #34495e;
+            text-align: center;
+            margin-top: 30px;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+
+        h3 {
+            color: #555;
+            margin-top: 20px;
+            margin-bottom: 15px;
+            font-size: 1.4em;
+        }
+
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 40px;
+            width: 100%;
+            max-width: 1200px;
+            margin-top: 20px;
+        }
+
+        .analogy-box {
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            width: 45%;
+            min-width: 320px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .analogy-box:hover {
+            transform: translateY(-5px);
+        }
+
+        .analogy-box h3 {
+            color: #2980b9;
+            margin-bottom: 25px;
+            font-size: 1.6em;
+            width: 100%;
+        }
+
+        .visual-area {
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            width: 100%;
+            height: 250px;
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        /* Water Analogy Styles */
+        .water-tank {
+            width: 90px;
+            height: 180px;
+            border: 4px solid #3498db;
+            border-radius: 5px;
+            position: relative;
+            background-color: #e0f2f7;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            overflow: hidden;
+            transition: height 0.3s ease-out;
+            margin: 0 10px;
+        }
+
+        .water-tank .water {
+            width: 100%;
+            background-color: #5dade2;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            transition: height 0.3s ease-out;
+            border-top: 2px solid #2874a6;
+        }
+
+        #tank1-level {
+            height: 30%; /* Initial water level */
+        }
+
+        #tank2-level {
+            height: 30%; /* Fixed water level */
+        }
+
+        .water-tank-label {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.9em;
+            color: #555;
+            white-space: nowrap;
+        }
+
+        .water-pipe {
+            width: 80px;
+            height: 15px;
+            background-color: #7f8c8d;
+            position: absolute;
+            bottom: 28px;
+            left: calc(50% - 40px);
+            z-index: 1;
+            border-radius: 3px;
+        }
+
+        .water-flow {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #2980b9;
+            border-radius: 50%;
+            opacity: 0;
+            animation: none;
+            z-index: 2;
+        }
+
+        @keyframes water-flow-anim {
+            0% {
+                transform: translateX(-35px) translateY(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateX(35px) translateY(0);
+                opacity: 0;
+            }
+        }
+
+        /* Electric Analogy Styles */
+        .circuit-diagram {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 200px;
+            position: relative;
+        }
+
+        .power-source {
+            width: 60px;
+            height: 90px;
+            background-color: #ecf0f1;
+            border: 2px solid #bdc3c7;
+            border-radius: 5px;
+            position: relative;
+            margin: 0 15px;
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.1);
+        }
+
+        .power-source::before {
+            content: '+';
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 1.5em;
+            color: #e74c3c;
+            font-weight: bold;
+        }
+
+        .power-source::after {
+            content: '-';
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 1.5em;
+            color: #3498db;
+            font-weight: bold;
+        }
+
+        .terminal {
+            width: 15px;
+            height: 15px;
+            background-color: #34495e;
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 3;
+            box-shadow: 0 0 5px rgba(0,0,0,0.3);
+        }
+
+        .terminal.positive {
+            right: -10px;
+            background-color: #e74c3c;
+        }
+
+        .terminal.negative {
+            left: -10px;
+            background-color: #3498db;
+        }
+
+        .wire {
+            width: 100px;
+            height: 5px;
+            background-color: #7f8c8d;
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            border-radius: 2px;
+            z-index: 1;
+        }
+
+        .wire.left {
+            left: 0;
+            width: 80px;
+            transform: translate(-100%, -50%);
+        }
+        .wire.right {
+            right: 0;
+            width: 80px;
+            transform: translate(100%, -50%);
+        }
+
+        .electron {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background-color: #3498db; /* Representing negative charge */
+            border-radius: 50%;
+            opacity: 0;
+            animation: none;
+            z-index: 2;
+            top: 50%;
+            transform: translateY(-50%) translateX(calc(-100% - 15px)); /* Start at negative terminal */
+        }
+
+        @keyframes electron-flow-anim {
+            0% {
+                transform: translateY(-50%) translateX(calc(-100% - 15px));
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-50%) translateX(calc(100% + 15px));
+                opacity: 0;
+            }
+        }
+
+        /* Controls and Explanations */
+        .controls {
+            margin-top: 20px;
+            width: 100%;
+            max-width: 400px;
+            padding: 20px;
+            background-color: #f8f8f8;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .controls label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #555;
+            font-size: 1.1em;
+        }
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .slider-container input[type="range"] {
+            flex-grow: 1;
+            -webkit-appearance: none;
+            width: 100%;
+            height: 10px;
+            background: #d3d3d3;
+            outline: none;
+            opacity: 0.7;
+            -webkit-transition: .2s;
+            transition: opacity .2s;
+            border-radius: 5px;
+        }
+
+        .slider-container input[type="range"]:hover {
+            opacity: 1;
+        }
+
+        .slider-container input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #28a745;
+            cursor: pointer;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .slider-container input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: #28a745;
+            cursor: pointer;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .slider-value {
+            margin-left: 15px;
+            font-weight: bold;
+            color: #28a745;
+            width: 40px;
+            text-align: right;
+        }
+
+        .explanation-box {
+            background-color: #e8f5e9;
+            border: 1px solid #c8e6c9;
+            border-left: 5px solid #4caf50;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            text-align: left;
+            font-size: 1.1em;
+            color: #388e3c;
+            width: 100%;
+            max-width: 800px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+        }
+
+        .summary-box {
+            background-color: #e3f2fd;
+            border: 1px solid #bbdefb;
+            border-left: 5px solid #2196f3;
+            border-radius: 8px;
+            padding: 25px;
+            margin-top: 40px;
+            text-align: left;
+            font-size: 1.15em;
+            color: #1976d2;
+            width: 100%;
+            max-width: 900px;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.12);
+        }
+        .summary-box ul {
+            list-style-type: disc;
+            margin-left: 25px;
+            padding-left: 0;
+        }
+        .summary-box li {
+            margin-bottom: 8px;
+        }
+        .summary-box strong {
+            color: #1565c0;
+        }
+
+        .footer {
+            margin-top: 40px;
+            padding: 20px;
+            text-align: center;
+            color: #777;
+            font-size: 0.9em;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                align-items: center;
+            }
+            .analogy-box {
+                width: 90%;
+            }
+            h1 {
+                font-size: 1.8em;
+            }
+            h2 {
+                font-size: 1.4em;
+            }
+            h3 {
+                font-size: 1.2em;
+            }
+            .explanation-box, .summary-box, .controls {
+                width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>สรุปเรื่องไฟฟ้า: ความต่างศักย์และแหล่งกำเนิด</h1>
+    <p style="text-align: center; max-width: 800px; margin-bottom: 30px; font-size: 1.1em;">
+        มาสรุปและทบทวนความรู้เรื่องการไหลของน้ำกับกระแสไฟฟ้า และความต่างศักย์กันนะ! ลองปรับ 'พลังงานที่ใส่เข้าไป' เพื่อดูการเปลี่ยนแปลง
+    </p>
+
+    <div class="controls">
+        <label for="energy-slider">พลังงานที่ใส่เข้าไป (เพื่อสร้างความแตกต่าง):</label>
+        <div class="slider-container">
+            <input type="range" id="energy-slider" min="0" max="100" value="0">
+            <span class="slider-value" id="slider-value">0%</span>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="analogy-box water-analogy">
+            <h3>การเปรียบเทียบ: ระดับน้ำ</h3>
+            <div class="visual-area">
+                <div class="water-tank" id="tank1">
+                    <div class="water" id="tank1-level"></div>
+                    <span class="water-tank-label">ถังที่ 1 (ระดับสูง)</span>
+                </div>
+                <div class="water-pipe">
+                    <div class="water-flow" id="water-flow-1"></div>
+                    <div class="water-flow" id="water-flow-2" style="animation-delay: 1s;"></div>
+                </div>
+                <div class="water-tank" id="tank2">
+                    <div class="water" id="tank2-level"></div>
+                    <span class="water-tank-label">ถังที่ 2 (ระดับต่ำ)</span>
+                </div>
+            </div>
+            <p id="water-explanation" style="min-height: 80px;"></p>
+        </div>
+
+        <div class="analogy-box electric-analogy">
+            <h3>การเปรียบเทียบ: ศักย์ไฟฟ้า</h3>
+            <div class="visual-area circuit-diagram">
+                <div class="power-source">
+                    <div class="terminal negative"></div>
+                    <div class="terminal positive"></div>
+                    <div class="wire left"></div>
+                    <div class="wire right"></div>
+                </div>
+                <div class="electron" id="electron-1"></div>
+                <div class="electron" id="electron-2" style="animation-delay: 0.5s;"></div>
+                <div class="electron" id="electron-3" style="animation-delay: 1s;"></div>
+            </div>
+            <p id="electric-explanation" style="min-height: 80px;"></p>
+        </div>
+    </div>
+
+    <div class="summary-box">
+        <h2>สรุปหลักการสำคัญ</h2>
+        <ul>
+            <li><strong>ความแตกต่างคือต้นกำเนิดการไหล:</strong>
+                <ul>
+                    <li>น้ำไหลจาก <strong>"ระดับสูง"</strong> ไป <strong>"ระดับต่ำ"</strong></li>
+                    <li>กระแสไฟฟ้า (อิเล็กตรอน) ไหลจาก <strong>"ศักย์ไฟฟ้าต่ำ (ขั้วลบ)"</strong> ไป <strong>"ศักย์ไฟฟ้าสูง (ขั้วบวก)"</strong> (หรือกระแสตามธรรมเนียมไหลจากบวกไปลบ)</li>
+                    <li>ความแตกต่างของระดับน้ำเราเรียกว่า <strong>"ความแตกต่างของพลังงานศักย์โน้มถ่วง"</strong></li>
+                    <li>ความแตกต่างของศักย์ไฟฟ้าเราเรียกว่า <strong>"ความต่างศักย์ไฟฟ้า (Voltage)"</strong></li>
+                </ul>
+            </li>
+            <li><strong>การสร้างความต่างศักย์ (แหล่งกำเนิดไฟฟ้า):</strong>
+                <ul>
+                    <li>ความต่างศักย์ไฟฟ้าไม่ได้เกิดขึ้นเอง แต่ต้อง <strong>"ใส่พลังงาน"</strong> เข้าไปเพื่อ <strong>"แยกประจุไฟฟ้า"</strong> ออกจากกัน</li>
+                    <li><strong>แบตเตอรี่:</strong> ใช้ <strong>"พลังงานเคมี"</strong> ในการสร้างความต่างศักย์</li>
+                    <li><strong>เครื่องกำเนิดไฟฟ้า (Generator):</strong> ใช้ <strong>"พลังงานกล"</strong> (เช่น จากน้ำตก, ลม, ไอน้ำจากการเผาไหม้เชื้อเพลิงนิวเคลียร์) ไปหมุนขดลวดในสนามแม่เหล็ก อาศัยหลักการ <strong>"การเหนี่ยวนำแม่เหล็กไฟฟ้า"</strong> เพื่อสร้างความต่างศักย์</li>
+                </ul>
+            </li>
+            <li><strong>"ขั้วบวก" และ "ขั้วลบ"</strong> มีหน้าที่สร้างความแตกต่างของศักย์ไฟฟ้า เพื่อ "ผลักดัน" ให้อิเล็กตรอนเคลื่อนที่ไปในทิศทางเดียวกันในวงจรไฟฟ้า ทำให้เกิดกระแสไฟฟ้าไหลได้</li>
+        </ul>
+    </div>
+
+    <footer class="footer">
+        โมเดลการเรียนรู้โดย Panya AI
+    </footer>
+
+    <script>
+        const energySlider = document.getElementById('energy-slider');
+        const sliderValueSpan = document.getElementById('slider-value');
+        const tank1Level = document.getElementById('tank1-level');
+        const waterFlow1 = document.getElementById('water-flow-1');
+        const waterFlow2 = document.getElementById('water-flow-2');
+        const waterExplanation = document.getElementById('water-explanation');
+        const electricExplanation = document.getElementById('electric-explanation');
+        const electrons = [
+            document.getElementById('electron-1'),
+            document.getElementById('electron-2'),
+            document.getElementById('electron-3')
+        ];
+
+        const initialTank1HeightPercent = 30; // Min height for tank 1
+        const maxTank1HeightPercent = 90; // Max height for tank 1
+        const tank2HeightPercent = 30; // Fixed height for tank 2
+
+        // Set initial tank 2 level
+        document.getElementById('tank2-level').style.height = `${tank2HeightPercent}%`;
+
+        function updateAnalogies() {
+            const energyInput = parseInt(energySlider.value);
+            sliderValueSpan.textContent = `${energyInput}%`;
+
+            // Water Analogy
+            const tank1CurrentHeight = initialTank1HeightPercent + (energyInput / 100) * (maxTank1HeightPercent - initialTank1HeightPercent);
+            tank1Level.style.height = `${tank1CurrentHeight}%`;
+
+            const waterHeightDiff = tank1CurrentHeight - tank2HeightPercent;
+
+            if (waterHeightDiff > 5) { // Threshold for flow
+                waterExplanation.innerHTML = `มี <strong>"ความแตกต่างของระดับน้ำ"</strong>! น้ำจึงไหลจากถังที่ 1 (ระดับสูง) ไปถังที่ 2 (ระดับต่ำ)`;
+                waterFlow1.style.animation = 'water-flow-anim 2s linear infinite';
+                waterFlow2.style.animation = 'water-flow-anim 2s linear infinite';
+            } else {
+                waterExplanation.innerHTML = `ระดับน้ำเท่ากัน ไม่มีความแตกต่างของระดับน้ำ น้ำจึง <strong>ไม่ไหล</strong>`;
+                waterFlow1.style.animation = 'none';
+                waterFlow2.style.animation = 'none';
+                waterFlow1.style.opacity = '0';
+                waterFlow2.style.opacity = '0';
+            }
+
+            // Electric Analogy
+            const potentialDiff = energyInput / 100 * 10; // Scale 0-10 for conceptual voltage
+
+            if (potentialDiff > 0.5) { // Threshold for flow
+                electricExplanation.innerHTML = `มี <strong>"ความต่างศักย์ไฟฟ้า"</strong> (หรือแรงดันไฟฟ้า)! อิเล็กตรอนจึงเคลื่อนที่จากขั้วลบไปขั้วบวก`;
+                electrons.forEach((el, index) => {
+                    el.style.animation = `electron-flow-anim 2s linear infinite ${index * 0.5}s`;
+                });
+            } else {
+                electricExplanation.innerHTML = `ไม่มีความต่างศักย์ไฟฟ้า อิเล็กตรอนจึง <strong>ไม่เคลื่อนที่</strong> (ไม่มีกระแสไฟฟ้า)`;
+                electrons.forEach(el => {
+                    el.style.animation = 'none';
+                    el.style.opacity = '0';
+                });
+            }
+        }
+
+        energySlider.addEventListener('input', updateAnalogies);
+
+        // Initial update
+        updateAnalogies();
+    </script>
+</body>
+</html>

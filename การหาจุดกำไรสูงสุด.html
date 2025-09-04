@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>การหาจุดกำไรสูงสุดด้วยอนุพันธ์</title>
+    <!-- Chart.js CDN for plotting interactive graphs -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <!-- Chart.js Plugin Annotation for marking specific points on the chart -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f7ffa3; /* Light background */
+            color: #333;
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container {
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            max-width: 1200px;
+            width: 100%;
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        h1, h2 {
+            color: #2c3e50; /* Darker blue for headings */
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        p {
+            margin-bottom: 10px;
+            text-align: justify;
+        }
+        ul {
+            margin-left: 20px;
+            margin-bottom: 10px;
+        }
+        li {
+            margin-bottom: 5px;
+        }
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f8f9fa; /* Lighter background for controls */
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+        .control-group {
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+            font-size: 0.95em;
+        }
+        input[type="number"] {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 1em;
+            width: 100%;
+            box-sizing: border-box; /* Include padding and border in the element's total width and height */
+            transition: border-color 0.2s;
+        }
+        input[type="number"]:focus {
+            border-color: #007bff; /* Blue focus highlight */
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+        }
+        .chart-container {
+            position: relative;
+            height: 500px; /* Fixed height for the chart */
+            width: 100%;
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+        }
+        .results {
+            background-color: #e6f7ff; /* Light blue background for results */
+            border-left: 5px solid #007bff; /* Blue left border */
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        .results p {
+            margin: 5px 0;
+            font-size: 1.1em;
+            color: #2c3e50;
+        }
+        .results p strong {
+            color: #0056b3; /* Darker blue for emphasis */
+        }
+        footer {
+            margin-top: 40px;
+            font-size: 0.9em;
+            color: #777;
+            text-align: center;
+        }
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            .controls {
+                grid-template-columns: 1fr; /* Stack controls on small screens */
+            }
+            .chart-container {
+                height: 400px; /* Adjust height for smaller screens */
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>การหาจุดกำไรสูงสุดด้วยอนุพันธ์: กรณีศึกษาทางการเงิน</h1>
+        <p>
+            สวัสดีนักเรียน! Panya AI จะพาทุกคนมาสำรวจว่าอนุพันธ์ช่วยให้บริษัทหาจุดที่จะได้กำไรสูงสุดได้อย่างไร ลองจินตนาการว่าเราเป็นผู้บริหารที่ต้องการตัดสินใจว่าจะผลิตสินค้าจำนวนเท่าไหร่ดีเพื่อทำกำไรให้มากที่สุด
+        </p>
+        <p>
+            ในทางเศรษฐศาสตร์ เรามีฟังก์ชันหลักๆ 3 ตัวที่สำคัญ และความสัมพันธ์กับอนุพันธ์:
+            <ul>
+                <li><strong>ฟังก์ชันรายรับรวม (Total Revenue, TR):</strong> คือรายรับทั้งหมดที่ได้จากการขายสินค้า มักจะอยู่ในรูป <code>TR(q) = (a - bq)q = aq - bq²</code> โดยที่ <code>a-bq</code> คือฟังก์ชันอุปสงค์ (ราคาต่อหน่วย) และ <code>q</code> คือจำนวนสินค้าที่ผลิตและขาย
+                    <ul><li>อนุพันธ์ของ TR คือ <strong>รายรับหน่วยสุดท้าย (Marginal Revenue, MR):</strong> <code>MR(q) = TR'(q) = a - 2bq</code></li></ul>
+                </li>
+                <li><strong>ฟังก์ชันต้นทุนรวม (Total Cost, TC):</strong> คือต้นทุนทั้งหมดในการผลิตสินค้า ทั้งต้นทุนคงที่และต้นทุนผันแปร มักจะอยู่ในรูป <code>TC(q) = cq² + dq + e</code> โดย <code>e</code> คือต้นทุนคงที่
+                    <ul><li>อนุพันธ์ของ TC คือ <strong>ต้นทุนหน่วยสุดท้าย (Marginal Cost, MC):</strong> <code>MC(q) = TC'(q) = 2cq + d</code></li></ul>
+                </li>
+                <li><strong>ฟังก์ชันกำไรรวม (Total Profit, TP):</strong> คือส่วนต่างระหว่างรายรับรวมและต้นทุนรวม: <code>TP(q) = TR(q) - TC(q)</code>
+                    <ul><li>อนุพันธ์ของ TP คือ <strong>กำไรหน่วยสุดท้าย (Marginal Profit, MP):</strong> <code>MP(q) = TP'(q) = TR'(q) - TC'(q) = MR(q) - MC(q)</code></li></ul>
+                </li>
+            </ul>
+        </p>
+        <p>
+            แนวคิดหลักในการหา <strong>"กำไรสูงสุด"</strong> คือเราจะหาจุดที่อัตราการเปลี่ยนแปลงของกำไรเป็นศูนย์ ซึ่งหมายถึงอนุพันธ์อันดับหนึ่งของฟังก์ชันกำไรมีค่าเป็นศูนย์: <code>TP'(q) = 0</code>.
+            จากความสัมพันธ์ข้างต้น จุดนี้จะเกิดขึ้นเมื่อ <strong>รายรับหน่วยสุดท้าย (Marginal Revenue, MR) เท่ากับ ต้นทุนหน่วยสุดท้าย (Marginal Cost, MC)</strong> หรือ <code>MR = MC</code> นั่นเอง!
+        </p>
+
+        <h2>ปรับพารามิเตอร์ของฟังก์ชันเพื่อดูการเปลี่ยนแปลง</h2>
+        <div class="controls">
+            <div class="control-group">
+                <label for="demand_a">TR = aq - bq² <br> ค่า a (สัมประสิทธิ์ของ q)</label>
+                <input type="number" id="demand_a" value="100" step="1">
+            </div>
+            <div class="control-group">
+                <label for="demand_b">TR = aq - bq² <br> ค่า b (สัมประสิทธิ์ของ q²)</label>
+                <input type="number" id="demand_b" value="2" step="0.1">
+            </div>
+            <div class="control-group">
+                <label for="cost_c">TC = cq² + dq + e <br> ค่า c (สัมประสิทธิ์ของ q²)</label>
+                <input type="number" id="cost_c" value="1" step="0.1">
+            </div>
+            <div class="control-group">
+                <label for="cost_d">TC = cq² + dq + e <br> ค่า d (สัมประสิทธิ์ของ q)</label>
+                <input type="number" id="cost_d" value="10" step="1">
+            </div>
+            <div class="control-group">
+                <label for="cost_e">TC = cq² + dq + e <br> ค่า e (ต้นทุนคงที่)</label>
+                <input type="number" id="cost_e" value="50" step="10">
+            </div>
+            <div class="control-group">
+                <label for="q_max_range">จำนวนสินค้าสูงสุดที่แสดงบนกราฟ (q_max)</label>
+                <input type="number" id="q_max_range" value="30" min="10" max="100" step="1">
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <canvas id="profitChart"></canvas>
+        </div>
+
+        <div class="results">
+            <h2>ผลลัพธ์การคำนวณ: จุดกำไรสูงสุด</h2>
+            <p>เมื่อปรับพารามิเตอร์แล้ว จุดกำไรสูงสุดจะอยู่ที่:</p>
+            <p>จำนวนสินค้าที่ควรผลิต (q): <strong id="optimalQ">N/A</strong> หน่วย</p>
+            <p>กำไรสูงสุด (Max Profit): <strong id="maxProfit">N/A</strong> บาท</p>
+            <p>รายรับรวม ณ จุดนั้น (TR): <strong id="optimalTR">N/A</strong> บาท</p>
+            <p>ต้นทุนรวม ณ จุดนั้น (TC): <strong id="optimalTC">N/A</strong> บาท</p>
+            <p>รายรับหน่วยสุดท้าย (MR) ณ จุดนั้น: <strong id="marginalRevenue">N/A</strong> บาท/หน่วย</p>
+            <p>ต้นทุนหน่วยสุดท้าย (MC) ณ จุดนั้น: <strong id="marginalCost">N/A</strong> บาท/หน่วย</p>
+            <p><em>(สังเกตว่าที่จุดกำไรสูงสุด ค่า MR ควรเท่ากับ MC และอนุพันธ์ของกำไรเป็นศูนย์)</em></p>
+        </div>
+    </div>
+
+    <footer>
+        <p>Panya AI &copy; 2024 - การศึกษาเรื่องลิมิตและอนุพันธ์</p>
+    </footer>
+
+    <script>
+        let profitChart; // Variable to hold the Chart.js instance
+
+        // Helper functions to calculate Total Revenue, Total Cost, and Total Profit
+        function calculateTR(q, a, b) {
+            return a * q - b * q * q;
+        }
+
+        function calculateTC(q, c, d, e) {
+            return c * q * q + d * q + e;
+        }
+
+        function calculateTP(q, a, b, c, d, e) {
+            return calculateTR(q, a, b) - calculateTC(q, c, d, e);
+        }
+
+        // Helper functions to calculate Marginal Revenue and Marginal Cost (derivatives)
+        function calculateMR(q, a, b) {
+            return a - 2 * b * q;
+        }
+
+        function calculateMC(q, c, d) {
+            return 2 * c * q + d;
+        }
+
+        // Function to update the chart and results based on user input
+        function updateChart() {
+            // Get parameter values from input fields
+            const a = parseFloat(document.getElementById('demand_a').value);
+            const b = parseFloat(document.getElementById('demand_b').value);
+            const c = parseFloat(document.getElementById('cost_c').value);
+            const d = parseFloat(document.getElementById('cost_d').value);
+            const e = parseFloat(document.getElementById('cost_e').value);
+            const qMaxRange = parseFloat(document.getElementById('q_max_range').value);
+
+            const qValues = []; // Array to hold quantity values for plotting
+            const trValues = []; // Array to hold Total Revenue values
+            const tcValues = []; // Array to hold Total Cost values
+            const tpValues = []; // Array to hold Total Profit values
+
+            // Calculate the optimal quantity (q) where profit is maximized
+            // This occurs when TP'(q) = 0, which means MR(q) = MC(q)
+            // TP(q) = TR(q) - TC(q) = (aq - bq²) - (cq² + dq + e)
+            // TP(q) = -(b+c)q² + (a-d)q - e
+            // TP'(q) = -2(b+c)q + (a-d)
+            // Set TP'(q) = 0: -2(b+c)q + (a-d) = 0 => q = (a-d) / (2(b+c))
+            let optimalQ = null;
+            if (2 * (b + c) !== 0) { // Avoid division by zero
+                optimalQ = (a - d) / (2 * (b + c));
+                // Profit maximization is only relevant for non-negative quantities
+                if (optimalQ < 0) optimalQ = 0;
+            } else if (a - d === 0) {
+                // If 2(b+c)=0 and a-d=0, TP'(q)=0 for all q, meaning profit is constant or linear
+                // For simplicity in this demo, treat as 0 or indicate no unique max.
+                optimalQ = 0;
+            } else {
+                // If 2(b+c)=0 but a-d != 0, profit is a strictly increasing or decreasing line, no max.
+                optimalQ = 0; // Default to 0, or could display 'No Max'
+            }
+            
+            // Limit optimalQ to the displayed range if it exceeds it
+            if (optimalQ > qMaxRange) optimalQ = qMaxRange; // Display up to qMaxRange
+
+            let maxProfit = -Infinity; // Initialize max profit to a very small number
+            let optimalTR = 0;
+            let optimalTC = 0;
+            let marginalRevenue = 0;
+            let marginalCost = 0;
+
+            // Generate data points for plotting
+            for (let i = 0; i <= qMaxRange; i += qMaxRange / 200) { // 200 points for smooth curves
+                const q = i;
+                qValues.push(q);
+                const tr = calculateTR(q, a, b);
+                const tc = calculateTC(q, c, d, e);
+                const tp = tr - tc;
+
+                trValues.push(tr);
+                tcValues.push(tc);
+                tpValues.push(tp);
+            }
+
+            // Calculate exact values at the analytically derived optimalQ
+            if (optimalQ !== null) {
+                maxProfit = calculateTP(optimalQ, a, b, c, d, e);
+                optimalTR = calculateTR(optimalQ, a, b);
+                optimalTC = calculateTC(optimalQ, c, d, e);
+                marginalRevenue = calculateMR(optimalQ, a, b);
+                marginalCost = calculateMC(optimalQ, c, d);
+            }
+
+            // Update result display area
+            document.getElementById('optimalQ').textContent = optimalQ !== null ? optimalQ.toFixed(2) : 'N/A';
+            document.getElementById('maxProfit').textContent = isFinite(maxProfit) ? maxProfit.toFixed(2) : 'N/A';
+            document.getElementById('optimalTR').textContent = isFinite(optimalTR) ? optimalTR.toFixed(2) : 'N/A';
+            document.getElementById('optimalTC').textContent = isFinite(optimalTC) ? optimalTC.toFixed(2) : 'N/A';
+            document.getElementById('marginalRevenue').textContent = isFinite(marginalRevenue) ? marginalRevenue.toFixed(2) : 'N/A';
+            document.getElementById('marginalCost').textContent = isFinite(marginalCost) ? marginalCost.toFixed(2) : 'N/A';
+
+            // Destroy previous chart instance if it exists to prevent memory leaks and redraw issues
+            if (profitChart) {
+                profitChart.destroy();
+            }
+
+            // Get the canvas element and create a new Chart.js instance
+            const ctx = document.getElementById('profitChart').getContext('2d');
+            profitChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: qValues.map(q => q.toFixed(1)), // X-axis labels (quantity)
+                    datasets: [
+                        {
+                            label: 'รายรับรวม (TR)',
+                            data: trValues,
+                            borderColor: 'rgb(75, 192, 192)', // Teal color
+                            tension: 0.1, // Smooth curves
+                            fill: false
+                        },
+                        {
+                            label: 'ต้นทุนรวม (TC)',
+                            data: tcValues,
+                            borderColor: 'rgb(255, 99, 132)', // Red color
+                            tension: 0.1,
+                            fill: false
+                        },
+                        {
+                            label: 'กำไรรวม (TP)',
+                            data: tpValues,
+                            borderColor: 'rgb(54, 162, 235)', // Blue color
+                            tension: 0.1,
+                            fill: false
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false, // Allow chart to fill its container
+                    scales: {
+                        x: {
+                            type: 'linear', // Use linear scale for quantity
+                            position: 'bottom',
+                            title: {
+                                display: true,
+                                text: 'จำนวนสินค้า (q)'
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    return value.toFixed(0); // Display integers on x-axis
+                                }
+                            },
+                            min: 0,
+                            max: qMaxRange
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'มูลค่า (บาท)'
+                            },
+                            beginAtZero: true
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        title: {
+                            display: true,
+                            text: 'กราฟรายรับ, ต้นทุน และกำไรรวม',
+                            font: {
+                                size: 18
+                            }
+                        },
+                        annotation: {
+                            annotations: {
+                                // Annotation for the optimal profit point
+                                optimalPoint: {
+                                    type: 'point',
+                                    xValue: optimalQ,
+                                    yValue: maxProfit,
+                                    radius: 8,
+                                    backgroundColor: 'rgba(255, 165, 0, 0.8)', // Orange color
+                                    borderColor: 'rgba(255, 165, 0, 1)',
+                                    borderWidth: 2,
+                                    label: {
+                                        display: true,
+                                        content: `กำไรสูงสุด: ${maxProfit.toFixed(2)}`,
+                                        position: 'top',
+                                        backgroundColor: 'rgba(255, 165, 0, 0.7)',
+                                        borderColor: 'rgba(255, 165, 0, 1)',
+                                        font: {
+                                            size: 12
+                                        },
+                                        xAdjust: 0,
+                                        yAdjust: -15
+                                    }
+                                },
+                                // Vertical line annotation for optimal quantity
+                                optimalLineX: {
+                                    type: 'line',
+                                    xMin: optimalQ,
+                                    xMax: optimalQ,
+                                    borderColor: 'rgba(0, 123, 255, 0.5)', // Blue dashed line
+                                    borderWidth: 2,
+                                    borderDash: [6, 6],
+                                    label: {
+                                        display: true,
+                                        content: `q = ${optimalQ.toFixed(2)}`,
+                                        position: 'end',
+                                        backgroundColor: 'rgba(0, 123, 255, 0.7)',
+                                        borderColor: 'rgba(0, 123, 255, 1)',
+                                        font: {
+                                            size: 12
+                                        },
+                                        yAdjust: -10,
+                                        xAdjust: 5
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Add event listeners to all number input fields to trigger chart update on change
+        document.querySelectorAll('.controls input[type="number"]').forEach(input => {
+            input.addEventListener('input', updateChart);
+        });
+
+        // Initial chart render when the DOM is fully loaded
+        document.addEventListener('DOMContentLoaded', updateChart);
+    </script>
+</body>
+</html>
