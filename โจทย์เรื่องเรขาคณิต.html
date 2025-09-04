@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>การสำรวจรูปสามเหลี่ยมมุมฉาก: จุด P บนด้านตรงข้ามมุมฉาก</title>
+    <!-- MathJax CDN for rendering mathematical expressions -->
+    <script>window.MathJax = {tex: {inlineMath: [['$', '$']], displayMath: [['$$', '$$']], processEscapes: true}, options: {skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']}, startup: {ready: () => {MathJax.startup.defaultReady(); MathJax.startup.promise.then(() => console.log('MathJax ready'));}}};</script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f7f6;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            max-width: 900px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        h1 {
+            color: #007bff;
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 1.8em;
+        }
+
+        .problem-statement {
+            background-color: #eaf6ff;
+            border-left: 5px solid #007bff;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            font-size: 1.1em;
+            color: #0056b3;
+        }
+
+        .solution-area {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 20px;
+        }
+
+        .diagram-wrapper {
+            flex: 1;
+            min-width: 300px;
+            background-color: #fdfdfd;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 10px;
+            box-sizing: border-box;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #triangleDiagram {
+            width: 100%;
+            max-width: 400px;
+            height: auto;
+            border: 1px dashed #cccccc;
+            background-color: #fcfcfc;
+        }
+
+        .explanation-wrapper {
+            flex: 2;
+            min-width: 350px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 20px;
+            background-color: #e6f7ff;
+            border-radius: 8px;
+            border: 1px solid #b3e0ff;
+        }
+
+        #stepExplanation {
+            margin-bottom: 20px;
+            font-size: 1.05em;
+        }
+
+        #stepExplanation p {
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        #stepExplanation strong {
+            color: #0056b3;
+        }
+
+        #nextStepBtn {
+            padding: 12px 25px;
+            font-size: 1.1em;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            align-self: flex-end;
+            margin-top: auto; /* Push button to the bottom */
+        }
+
+        #nextStepBtn:hover {
+            background-color: #218838;
+        }
+
+        /* SVG Styles */
+        .point {
+            fill: #dc3545;
+            stroke: #dc3545;
+        }
+
+        .label, .angle-label, .length-label {
+            font-family: 'Times New Roman', serif;
+            font-size: 14px;
+            fill: #333;
+        }
+
+        .triangle-side {
+            stroke: #343a40;
+            stroke-width: 2;
+            fill: none;
+        }
+
+        .segment-CP, .segment-CM {
+            stroke: #28a745;
+            stroke-width: 1.5;
+            stroke-dasharray: 4 2;
+            fill: none;
+        }
+
+        .right-angle-mark {
+            stroke: #6c757d;
+            stroke-width: 1.5;
+            fill: none;
+        }
+
+        .angle-arc {
+            stroke: #007bff;
+            stroke-width: 1.5;
+            fill: rgba(0, 123, 255, 0.1);
+            transition: fill 0.3s ease;
+        }
+
+        .highlight-triangle {
+            fill: rgba(255, 193, 7, 0.3);
+            stroke: none;
+        }
+
+        .highlight {
+            font-weight: bold;
+            fill: #d9534f;
+            font-size: 15px;
+        }
+
+        /* MathJax specific overrides */
+        .MathJax {
+            font-size: 1.1em !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>การสำรวจรูปสามเหลี่ยมมุมฉาก: จุด P บนด้านตรงข้ามมุมฉาก</h1>
+        <div class="problem-statement">
+            <p><strong>โจทย์:</strong> กำหนดให้ $ABC$ เป็นรูปสามเหลี่ยมมุมฉาก ที่มี $\angle BCA = 90^\circ$ ให้ $P$ เป็นจุดบน $AB$ ที่ทำให้ $ \frac{1}{AP} + \frac{1}{BP} = \frac{2}{CP} $ ถ้า $\angle ACP = 41^\circ$ แล้ว ขนาดของ $\angle ABC$ เท่ากับกี่องศา</p>
+        </div>
+
+        <div class="solution-area">
+            <div class="diagram-wrapper">
+                <svg id="triangleDiagram" viewBox="-20 -110 120 130" preserveAspectRatio="xMidYMid meet">
+                    <!-- SVG elements will be drawn/updated by JavaScript -->
+                </svg>
+            </div>
+            <div class="explanation-wrapper">
+                <div id="stepExplanation">
+                    <!-- Step explanations will be loaded here -->
+                </div>
+                <button id="nextStepBtn">ขั้นตอนต่อไป</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables for SVG and current step
+        let currentStep = 0;
+        const svg = document.getElementById('triangleDiagram');
+        const stepExplanation = document.getElementById('stepExplanation');
+        const nextStepBtn = document.getElementById('nextStepBtn');
+
+        // Define static points for the triangle (C at origin, A on y-axis, B on x-axis)
+        const C = {x: 0, y: 0};
+        const H = 80; // Height of triangle AC
+        // To make ∠BAC = 41 degrees for the diagram: tan(41) = BC/AC = W/H
+        const W = H * Math.tan(41 * Math.PI / 180); // Width of triangle BC
+        const A = {x: 0, y: -H};
+        const B = {x: W, y: 0};
+        const P_coords = {x: (A.x + B.x) / 2, y: (A.y + B.y) / 2}; // P will be the midpoint
+
+        // Helper functions for drawing SVG elements
+        function createSvgElement(tag, attributes) {
+            const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+            for (const key in attributes) {
+                el.setAttribute(key, attributes[key]);
+            }
+            return el;
+        }
+
+        function clearSvg() {
+            while (svg.firstChild) {
+                svg.removeChild(svg.firstChild);
+            }
+        }
+
+        function drawPoint(svgEl, coord, labelText, position = 'bottom') {
+            const circle = createSvgElement('circle', {
+                cx: coord.x, cy: coord.y, r: 3, class: 'point'
+            });
+            svgEl.appendChild(circle);
+
+            const text = createSvgElement('text', {
+                x: coord.x, cy: coord.y, class: 'label'
+            });
+            text.textContent = labelText;
+
+            // Adjust text position
+            switch (position) {
+                case 'top': text.setAttribute('y', coord.y - 10); text.setAttribute('text-anchor', 'middle'); break;
+                case 'bottom': text.setAttribute('y', coord.y + 15); text.setAttribute('text-anchor', 'middle'); break;
+                case 'left': text.setAttribute('x', coord.x - 10); text.setAttribute('dominant-baseline', 'middle'); text.setAttribute('text-anchor', 'end'); break;
+                case 'right': text.setAttribute('x', coord.x + 10); text.setAttribute('dominant-baseline', 'middle'); text.setAttribute('text-anchor', 'start'); break;
+                case 'top-left': text.setAttribute('x', coord.x - 8); text.setAttribute('y', coord.y - 8); text.setAttribute('text-anchor', 'end'); break;
+                case 'bottom-left': text.setAttribute('x', coord.x - 8); text.setAttribute('y', coord.y + 8); text.setAttribute('text-anchor', 'end'); break;
+                case 'top-right': text.setAttribute('x', coord.x + 8); text.setAttribute('y', coord.y - 8); text.setAttribute('text-anchor', 'start'); break;
+                case 'bottom-right': text.setAttribute('x', coord.x + 8); text.setAttribute('y', coord.y + 8); text.setAttribute('text-anchor', 'start'); break;
+                case 'mid-top': text.setAttribute('x', coord.x); text.setAttribute('y', coord.y - 8); text.setAttribute('text-anchor', 'middle'); break;
+                default: text.setAttribute('y', coord.y + 15); text.setAttribute('text-anchor', 'middle'); break;
+            }
+            svgEl.appendChild(text);
+        }
+
+        function drawLine(svgEl, startCoord, endCoord, className) {
+            const line = createSvgElement('line', {
+                x1: startCoord.x, y1: startCoord.y, x2: endCoord.x, y2: endCoord.y, class: className
+            });
+            svgEl.appendChild(line);
+        }
+
+        function drawRightAngle(svgEl, vertex, p1, p2, size = 10) {
+            const v1x = p1.x - vertex.x;
+            const v1y = p1.y - vertex.y;
+            const v2x = p2.x - vertex.x;
+            const v2y = p2.y - vertex.y;
+
+            const len1 = Math.sqrt(v1x*v1x + v1y*v1y);
+            const len2 = Math.sqrt(v2x*v2x + v2y*v2y);
+            const u1x = v1x / len1;
+            const u1y = v1y / len1;
+            const u2x = v2x / len2;
+            const u2y = v2y / len2;
+
+            const p1_corner = {x: vertex.x + u1x * size, y: vertex.y + u1y * size};
+            const p2_corner = {x: vertex.x + u2x * size, y: vertex.y + u2y * size};
+            const p_middle = {x: vertex.x + u1x * size + u2x * size, y: vertex.y + u1y * size + u2y * size};
+
+            const path = createSvgElement('path', {
+                d: `M ${p1_corner.x} ${p1_corner.y} L ${p_middle.x} ${p_middle.y} L ${p2_corner.x} ${p2_corner.y}`,
+                class: 'right-angle-mark'
+            });
+            svgEl.appendChild(path);
+        }
+
+        function drawAngleArc(svgEl, p1, vertex, p2, id, labelText, options = {}) {
+            const radius = options.radius || 20;
+            const startAngleRad = Math.atan2(p1.y - vertex.y, p1.x - vertex.x);
+            const endAngleRad = Math.atan2(p2.y - vertex.y, p2.x - vertex.x);
+
+            const startX = vertex.x + radius * Math.cos(startAngleRad);
+            const startY = vertex.y + radius * Math.sin(startAngleRad);
+            const endX = vertex.x + radius * Math.cos(endAngleRad);
+            const endY = vertex.y + radius * Math.sin(endAngleRad);
+            
+            let sweepFlag = 0; // 0 for clockwise, 1 for counter-clockwise
+            // Determine sweep direction
+            // Cross product of vectors (vertex -> p1) and (vertex -> p2)
+            const v1 = {x: p1.x - vertex.x, y: p1.y - vertex.y};
+            const v2 = {x: p2.x - vertex.x, y: p2.y - vertex.y};
+            const crossProduct = v1.x * v2.y - v1.y * v2.x;
+            if (crossProduct > 0) { // Counter-clockwise turn
+                sweepFlag = 1;
+            } else if (crossProduct < 0) { // Clockwise turn
+                sweepFlag = 0;
+            } else { // Collinear
+                sweepFlag = 0;
+            }
+
+            const path = createSvgElement('path', {
+                d: `M ${startX} ${startY} A ${radius} ${radius} 0 0 ${sweepFlag} ${endX} ${endY}`,
+                class: 'angle-arc',
+                id: id
+            });
+            if (options.fill) path.style.fill = options.fill;
+            svgEl.appendChild(path);
+
+            // Label for the angle
+            const midAngleRad = (startAngleRad + endAngleRad) / 2;
+            const labelX = vertex.x + (radius + 15) * Math.cos(midAngleRad);
+            const labelY = vertex.y + (radius + 15) * Math.sin(midAngleRad);
+            const label = createSvgElement('text', {
+                x: labelX, y: labelY, class: 'angle-label'
+            });
+            label.textContent = `$${labelText}$`; // Wrap in MathJax delimiters
+            label.setAttribute('text-anchor', 'middle');
+            label.setAttribute('dominant-baseline', 'middle');
+            label.id = `label-${id}`;
+            svgEl.appendChild(label);
+        }
+
+        function drawLabel(svgEl, coord, labelText, className = 'label', id = '') {
+            const text = createSvgElement('text', {
+                x: coord.x, y: coord.y, class: className, id: id
+            });
+            text.textContent = `$${labelText}$`;
+            text.setAttribute('text-anchor', 'middle');
+            text.setAttribute('dominant-baseline', 'middle');
+            svgEl.appendChild(text);
+        }
+
+        function drawLengthLabel(svgEl, p1, p2, labelText, offsetDirection, id = '') {
+            const midX = (p1.x + p2.x) / 2;
+            const midY = (p1.y + p2.y) / 2;
+            
+            let labelX = midX;
+            let labelY = midY;
+            const offset = 12; // Distance from line
+
+            // Calculate angle of line for perpendicular offset
+            const angleRad = Math.atan2(p2.y - p1.y, p2.x - p1.x);
+
+            if (offsetDirection === 'above') { // Assuming Y-axis is inverted for SVG
+                labelX += offset * Math.sin(angleRad);
+                labelY -= offset * Math.cos(angleRad);
+            } else if (offsetDirection === 'below') {
+                labelX -= offset * Math.sin(angleRad);
+                labelY += offset * Math.cos(angleRad);
+            }
+
+            const text = createSvgElement('text', {
+                x: labelX, y: labelY, class: 'length-label', id: id
+            });
+            text.textContent = `$${labelText}$`;
+            text.setAttribute('text-anchor', 'middle');
+            text.setAttribute('dominant-baseline', 'middle');
+            svgEl.appendChild(text);
+        }
+
+        function hideElement(svgEl, id) {
+            const el = svgEl.querySelector(`#${id}`);
+            if (el) el.style.display = 'none';
+            const labelEl = svgEl.querySelector(`#label-${id}`);
+            if (labelEl) labelEl.style.display = 'none';
+        }
+        function showElement(svgEl, id) {
+            const el = svgEl.querySelector(`#${id}`);
+            if (el) el.style.display = '';
+            const labelEl = svgEl.querySelector(`#label-${id}`);
+            if (labelEl) labelEl.style.display = '';
+        }
+
+        function highlightTriangle(svgEl, p1, p2, p3) {
+            const polygon = createSvgElement('polygon', {
+                points: `${p1.x},${p1.y} ${p2.x},${p2.y} ${p3.x},${p3.y}`,
+                class: 'highlight-triangle',
+                id: 'highlightedTriangle'
+            });
+            svgEl.prepend(polygon); // Put under other elements
+        }
+        function removeHighlight(svgEl) {
+            const highlight = svgEl.querySelector('#highlightedTriangle');
+            if (highlight) svgEl.removeChild(highlight);
+        }
+
+        // Function to render MathJax after DOM updates
+        function renderMath() {
+            MathJax.typesetPromise().then(() => {
+                // Adjust text alignment if needed after rendering
+            });
+        }
+
+        const steps = [
+            {
+                explanation: `
+                    <p><strong>ขั้นตอนที่ 1: ทำความเข้าใจโจทย์และการตั้งค่าเบื้องต้น</strong></p>
+                    <p>เรามีรูปสามเหลี่ยมมุมฉาก $ABC$ โดยที่มุม $C$ เป็นมุมฉาก ($\angle BCA = 90^\circ$)</p>
+                    <p>จุด $P$ อยู่บนด้านตรงข้ามมุมฉาก $AB$ โดยมีเงื่อนไขพิเศษ: $$\\frac{1}{AP} + \\frac{1}{BP} = \\frac{2}{CP}$$</p>
+                    <p>นอกจากนี้ เราทราบว่า $\angle ACP = 41^\circ$ สิ่งที่เราต้องการหาคือขนาดของ $\angle ABC$</p>
+                `,
+                diagram: (svg, {A,B,C,P}) => {
+                    drawPoint(svg, C, 'C', 'bottom-left');
+                    drawPoint(svg, A, 'A', 'top-left');
+                    drawPoint(svg, B, 'B', 'bottom-right');
+                    drawLine(svg, C, A, 'triangle-side');
+                    drawLine(svg, C, B, 'triangle-side');
+                    drawLine(svg, A, B, 'triangle-side');
+                    drawRightAngle(svg, C, A, B);
+                    drawAngleArc(svg, A, C, P, 'angle-ACP', '41^\\circ', {fill: '#ADD8E6'});
+                    drawLine(svg, C, P, 'segment-CP', 'cp-line');
+                    drawPoint(svg, P, 'P', 'top');
+                }
+            },
+            {
+                explanation: `
+                    <p><strong>ขั้นตอนที่ 2: สมบัติสำคัญของรูปสามเหลี่ยมมุมฉาก</strong></p>
+                    <p>ในรูปสามเหลี่ยมมุมฉากใด ๆ จุดกึ่งกลางของด้านตรงข้ามมุมฉาก (hypotenuse) จะห่างจากจุดยอดทั้งสามเท่ากัน</p>
+                    <p>ให้ $M$ เป็นจุดกึ่งกลางของ $AB$ ดังนั้น $AM = BM = CM$</p>
+                    <p>นี่หมายความว่า $M$ เป็นจุดศูนย์กลางของวงกลมที่ล้อมรอบสามเหลี่ยม $ABC$ และ $CM$ เป็นรัศมีเช่นกัน</p>
+                `,
+                diagram: (svg, {A,B,C,P}) => {
+                    const M = {x: (A.x + B.x) / 2, y: (A.y + B.y) / 2};
+                    drawPoint(svg, C, 'C', 'bottom-left');
+                    drawPoint(svg, A, 'A', 'top-left');
+                    drawPoint(svg, B, 'B', 'bottom-right');
+                    drawLine(svg, C, A, 'triangle-side');
+                    drawLine(svg, C, B, 'triangle-side');
+                    drawLine(svg, A, B, 'triangle-side');
+                    drawRightAngle(svg, C, A, B);
+                    drawPoint(svg, M, 'M', 'top'); // M is the midpoint
+                    drawLine(svg, C, M, 'segment-CM', 'cm-line');
+                    drawLengthLabel(svg, A, M, 'AM', 'above', 'label-AM');
+                    drawLengthLabel(svg, M, B, 'BM', 'above', 'label-BM');
+                    drawLengthLabel(svg, C, M, 'CM', 'below', 'label-CM');
+                }
+            },
+            {
+                explanation: `
+                    <p><strong>ขั้นตอนที่ 3: การพิสูจน์ว่า $P$ คือจุดกึ่งกลาง $M$</strong></p>
+                    <p>ลองพิจารณาเงื่อนไขที่ให้มา $\\frac{1}{AP} + \\frac{1}{BP} = \\frac{2}{CP}$</p>
+                    <p>ถ้า $P$ เป็นจุดกึ่งกลางของ $AB$ (คือ $P=M$) เราจะแทน $AP = AM$ และ $BP = BM$ และ $CP = CM$</p>
+                    <p>จากขั้นตอนที่ 2 เราทราบว่า $AM = BM = CM$</p>
+                    <p>ดังนั้น เงื่อนไขจะกลายเป็น $\\frac{1}{AM} + \\frac{1}{AM} = \\frac{2}{AM}$ ซึ่งง่ายเป็น $\\frac{2}{AM} = \\frac{2}{AM}$ ซึ่งเป็นจริงเสมอ</p>
+                    <p>นี่หมายความว่า <strong>จุด $P$ ต้องเป็นจุดกึ่งกลางของด้านตรงข้ามมุมฉาก $AB$</strong></p>
+                `,
+                diagram: (svg, {A,B,C,P}) => {
+                    const M = {x: (A.x + B.x) / 2, y: (A.y + B.y) / 2};
+                    drawPoint(svg, C, 'C', 'bottom-left');
+                    drawPoint(svg, A, 'A', 'top-left');
+                    drawPoint(svg, B, 'B', 'bottom-right');
+                    drawLine(svg, C, A, 'triangle-side');
+                    drawLine(svg, C, B, 'triangle-side');
+                    drawLine(svg, A, B, 'triangle-side');
+                    drawRightAngle(svg, C, A, B);
+                    drawPoint(svg, M, 'P (M)', 'top'); // Now P is explicitly M
+                    drawLine(svg, C, M, 'segment-CP', 'cp-line'); // CP is CM
+                    drawAngleArc(svg, A, C, M, 'angle-ACP', '41^\\circ', {fill: '#ADD8E6'});
+                    drawLabel(svg, {x: (A.x+M.x)/2 - 5, y: (A.y+M.y)/2 - 10}, 'AM=CM', 'highlight', 'label-AMCM');
+                    drawLabel(svg, {x: (B.x+M.x)/2 + 5, y: (B.y+M.y)/2 - 10}, 'BM=CM', 'highlight', 'label-BMCM');
+                }
+            },
+            {
+                explanation: `
+                    <p><strong>ขั้นตอนที่ 4: ใช้ข้อมูลมุมที่ให้มาเพื่อหามุม $BAC$</strong></p>
+                    <p>เมื่อเราทราบว่า $P$ คือจุดกึ่งกลาง $M$ เราก็ทราบว่า $PA = PC$ (จาก $AM=CM$ ในขั้นตอนที่ 2)</p>
+                    <p>ดังนั้น สามเหลี่ยม $PAC$ (หรือ $MAC$) เป็นสามเหลี่ยมหน้าจั่ว</p>
+                    <p>ในสามเหลี่ยมหน้าจั่ว $PAC$ มุมที่ฐานจะเท่ากัน: $\angle PAC = \angle PCA$</p>
+                    <p>โจทย์กำหนดให้ $\angle ACP = 41^\circ$ ดังนั้น $\angle PAC = 41^\circ$ ด้วย</p>
+                    <p>มุม $\angle PAC$ คือมุมเดียวกันกับ $\angle BAC$ ของสามเหลี่ยมใหญ่ $ABC$ ดังนั้น $\angle BAC = 41^\circ$</p>
+                `,
+                diagram: (svg, {A,B,C,P}) => {
+                    const M = {x: (A.x + B.x) / 2, y: (A.y + B.y) / 2};
+                    drawPoint(svg, C, 'C', 'bottom-left');
+                    drawPoint(svg, A, 'A', 'top-left');
+                    drawPoint(svg, B, 'B', 'bottom-right');
+                    drawLine(svg, C, A, 'triangle-side');
+                    drawLine(svg, C, B, 'triangle-side');
+                    drawLine(svg, A, B, 'triangle-side');
+                    drawRightAngle(svg, C, A, B);
+                    drawPoint(svg, M, 'P (M)', 'top');
+                    drawLine(svg, C, M, 'segment-CP', 'cp-line');
+                    drawAngleArc(svg, A, C, M, 'angle-ACP', '41^\\circ', {fill: '#ADD8E6'});
+                    drawAngleArc(svg, C, A, B, 'angle-BAC', '41^\\circ', {fill: '#ADD8E6'});
+                    highlightTriangle(svg, A, C, M); // Highlight PAC
+                }
+            },
+            {
+                explanation: `
+                    <p><strong>ขั้นตอนที่ 5: คำนวณหา $\angle ABC$</strong></p>
+                    <p>ตอนนี้เราทราบมุมสองมุมในสามเหลี่ยมมุมฉาก $ABC$ แล้ว:</p>
+                    <ul>
+                        <li>$\angle BCA = 90^\circ$ (กำหนดให้)</li>
+                        <li>$\angle BAC = 41^\circ$ (จากขั้นตอนที่ 4)</li>
+                    </ul>
+                    <p>ผลรวมของมุมภายในของสามเหลี่ยมคือ $180^\circ$ ดังนั้น:</p>
+                    <p>$\angle ABC = 180^\circ - \angle BCA - \angle BAC$</p>
+                    <p>$\angle ABC = 180^\circ - 90^\circ - 41^\circ$</p>
+                    <p>$\angle ABC = 90^\circ - 41^\circ$</p>
+                    <p>$\angle ABC = 49^\circ$</p>
+                    <p>ดังนั้น ขนาดของ $\angle ABC$ คือ $49^\circ$</p>
+                `,
+                diagram: (svg, {A,B,C,P}) => {
+                    const M = {x: (A.x + B.x) / 2, y: (A.y + B.y) / 2};
+                    drawPoint(svg, C, 'C', 'bottom-left');
+                    drawPoint(svg, A, 'A', 'top-left');
+                    drawPoint(svg, B, 'B', 'bottom-right');
+                    drawLine(svg, C, A, 'triangle-side');
+                    drawLine(svg, C, B, 'triangle-side');
+                    drawLine(svg, A, B, 'triangle-side');
+                    drawRightAngle(svg, C, A, B);
+                    drawPoint(svg, M, 'P (M)', 'top');
+                    drawLine(svg, C, M, 'segment-CP', 'cp-line');
+                    drawAngleArc(svg, A, C, M, 'angle-ACP', '41^\\circ', {fill: '#ADD8E6'});
+                    drawAngleArc(svg, C, A, B, 'angle-BAC', '41^\\circ', {fill: '#ADD8E6'});
+                    drawAngleArc(svg, A, B, C, 'angle-ABC', '49^\\circ', {fill: '#90EE90'});
+                }
+            }
+        ];
+
+        function updateDiagramAndExplanation() {
+            clearSvg(); // Clear previous diagram
+            removeHighlight(svg); // Remove any highlights
+            stepExplanation.innerHTML = steps[currentStep].explanation; // Update explanation
+            steps[currentStep].diagram(svg, {A,B,C,P: P_coords}); // Update diagram for current step
+
+            renderMath(); // Re-render MathJax
+            
+            if (currentStep === steps.length - 1) {
+                nextStepBtn.textContent = 'เริ่มต้นใหม่';
+            } else {
+                nextStepBtn.textContent = 'ขั้นตอนต่อไป';
+            }
+        }
+
+        nextStepBtn.addEventListener('click', () => {
+            if (currentStep === steps.length - 1) {
+                currentStep = 0; // Reset
+            } else {
+                currentStep++;
+            }
+            updateDiagramAndExplanation();
+        });
+
+        // Initial load
+        updateDiagramAndExplanation();
+    </script>
+</body>
+</html>

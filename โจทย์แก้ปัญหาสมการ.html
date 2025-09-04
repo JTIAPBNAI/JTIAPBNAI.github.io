@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>การแก้ปัญหา: หาค่ามากที่สุดของ (x-y)z</title>
+    <script>window.MathJax = {tex: {inlineMath: [['$', '$']], displayMath: [['$$', '$$']], processEscapes: true}, options: {skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']}, startup: {ready: () => {MathJax.startup.defaultReady(); MathJax.startup.promise.then(() => console.log('MathJax ready'));}}};</script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f7f6;
+            color: #333;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+            padding: 30px 40px;
+        }
+        h1, h2, h3 {
+            color: #2c3e50;
+            margin-top: 25px;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+        }
+        h1 {
+            text-align: center;
+            font-size: 2.2em;
+            color: #007bff;
+            border-bottom: 2px solid #007bff;
+        }
+        h2 {
+            font-size: 1.8em;
+            color: #34495e;
+            border-bottom: 1px solid #eee;
+        }
+        h3 {
+            font-size: 1.4em;
+            color: #2980b9;
+        }
+        p {
+            margin-bottom: 10px;
+        }
+        .math-block {
+            background-color: #ecf0f1;
+            border-left: 5px solid #007bff;
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            overflow-x: auto; /* For long equations */
+        }
+        .step-content {
+            display: none;
+            padding: 15px 0;
+            border-top: 1px dashed #e0e0e0;
+            margin-top: 15px;
+        }
+        .step-content:first-of-type {
+            border-top: none;
+            margin-top: 0;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            margin-top: 15px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        button:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+        }
+        button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .highlight {
+            background-color: #e6f2ff;
+            padding: 5px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            color: #007bff;
+        }
+        .result-box {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #badbcc;
+            padding: 20px;
+            margin-top: 30px;
+            border-radius: 8px;
+            font-size: 1.2em;
+            font-weight: bold;
+            text-align: center;
+        }
+        .error-message {
+            color: #dc3545;
+            font-weight: bold;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 10px;
+        }
+        .success-message {
+            color: #28a745;
+            font-weight: bold;
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 10px;
+        }
+        .card {
+            background-color: #f9f9f9;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+        .card h4 {
+            color: #007bff;
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+        .card-content {
+            display: none;
+        }
+        ul {
+            list-style-type: disc;
+            margin-left: 20px;
+            padding-left: 0;
+        }
+        li {
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>การแก้ปัญหา: หาค่ามากที่สุดของ $(x-y)z$</h1>
+        <p>ยินดีต้อนรับสู่ Panya AI! เราจะมาไขปริศนาทางคณิตศาสตร์นี้ไปพร้อมกัน โดยหาค่ามากที่สุดของนิพจน์ $(x-y)z$ ภายใต้เงื่อนไขที่กำหนด</p>
+
+        <div id="step1">
+            <h2>ขั้นตอนที่ 1: ทำความเข้าใจโจทย์และเงื่อนไขที่กำหนด</h2>
+            <p>โจทย์กำหนดให้ $x, y, z$ เป็นจำนวนเต็มบวก โดยมีสมการ 2 สมการที่ต้องใช้ในการแก้ปัญหา:</p>
+            <div class="math-block">
+                $$1. \quad x + z = 3y$$
+                $$2. \quad x^2 + y^2 + z^2 = 230$$
+            </div>
+            <p>เป้าหมายของเราคือการหาค่ามากที่สุดของนิพจน์ $(x-y)z$ โดยที่ $x, y, z$ ต้องเป็นจำนวนเต็มบวก</p>
+            <button onclick="revealStep(2)">แสดงขั้นตอนที่ 2: การจัดรูปสมการ</button>
+        </div>
+
+        <div id="step2" class="step-content">
+            <h2>ขั้นตอนที่ 2: การจัดรูปและรวมสมการ</h2>
+            <p>เราจะใช้สมการที่ 1 เพื่อลดตัวแปรและจัดรูปสมการที่ 2:</p>
+            <div class="math-block">
+                จาก (1): $x + z = 3y$ <br>
+                พิจารณาจากเอกลักษณ์กำลังสอง: $(x+z)^2 = x^2 + 2xz + z^2$ <br>
+                ดังนั้น เราสามารถจัดรูป $x^2 + z^2$ ได้เป็น: $x^2 + z^2 = (x+z)^2 - 2xz$
+            </div>
+            <p>นำค่า $x+z = 3y$ ไปแทนค่าในนิพจน์ $x^2+z^2$ ที่จัดรูปแล้ว:</p>
+            <div class="math-block">
+                $x^2 + z^2 = (3y)^2 - 2xz = 9y^2 - 2xz$
+            </div>
+            <p>ทีนี้ นำค่า $x^2 + z^2$ ที่ได้ไปแทนในสมการที่ 2 ($x^2 + y^2 + z^2 = 230$):</p>
+            <div class="math-block">
+                $(9y^2 - 2xz) + y^2 = 230$ <br>
+                $10y^2 - 2xz = 230$
+            </div>
+            <p>จัดรูปสมการใหม่เพื่อหานิพจน์สำหรับ $xz$ ในรูปของ $y$:</p>
+            <div class="math-block">
+                $2xz = 10y^2 - 230$ <br>
+                $xz = 5y^2 - 115 \quad (\text{สมการ A})$
+            </div>
+            <p>ตอนนี้เรามีสองสมการหลักที่เชื่อมโยง $x, y, z$ คือ $x+z=3y$ และ $xz = 5y^2-115$</p>
+            <button onclick="revealStep(3)">แสดงขั้นตอนที่ 3: หาช่วงของค่า $y$ ที่เป็นไปได้</button>
+        </div>
+
+        <div id="step3" class="step-content">
+            <h2>ขั้นตอนที่ 3: หาช่วงของค่า $y$ ที่เป็นไปได้</h2>
+            <p>เนื่องจาก $x$ และ $z$ เป็นจำนวนจริง (และเราต้องการจำนวนเต็มบวก) เราสามารถมอง $x$ และ $z$ ว่าเป็นรากของสมการกำลังสอง $t^2 - (x+z)t + xz = 0$ เมื่อ $t$ คือตัวแปร</p>
+            <p>แทนค่า $x+z = 3y$ (จากสมการ 1) และ $xz = 5y^2 - 115$ (จากสมการ A) เข้าไปในสมการกำลังสอง:</p>
+            <div class="math-block">
+                $$t^2 - (3y)t + (5y^2 - 115) = 0$$
+            </div>
+            <p>สำหรับการที่สมการกำลังสองจะมีรากเป็นจำนวนจริงได้นั้น ค่าดิสคริมิแนนต์ ($\Delta$) ต้องมากกว่าหรือเท่ากับศูนย์ ($\Delta \ge 0$)</p>
+            <div class="math-block">
+                $$\Delta = b^2 - 4ac = (-3y)^2 - 4(1)(5y^2 - 115)$$
+                $$\Delta = 9y^2 - 20y^2 + 460$$
+                $$\Delta = -11y^2 + 460$$
+            </div>
+            <p>กำหนดให้ $\Delta \ge 0$ เพื่อให้มีคำตอบเป็นจำนวนจริงสำหรับ $x$ และ $z$:</p>
+            <div class="math-block">
+                $$-11y^2 + 460 \ge 0$$
+                $$460 \ge 11y^2$$
+                $$y^2 \le \frac{460}{11}$$
+                $$y^2 \le 41.818...$$
+            </div>
+            <p>เนื่องจาก $y$ เป็นจำนวนเต็มบวก ($y \in \mathbb{Z}^+$) ค่า $y^2$ ที่เป็นไปได้จึงต้องเป็นกำลังสองของจำนวนเต็มบวกที่น้อยกว่าหรือเท่ากับ $41.818...$</p>
+            <p>ดังนั้น $y^2$ ที่เป็นไปได้คือ $1, 4, 9, 16, 25, 36$ เท่านั้น</p>
+            <p>นั่นหมายความว่า ค่า $y$ ที่เป็นไปได้คือ $\boxed{1, 2, 3, 4, 5, 6}$</p>
+            <button onclick="revealStep(4)">แสดงขั้นตอนที่ 4: ตรวจสอบแต่ละค่า $y$ และหา $x, z$</button>
+        </div>
+
+        <div id="step4" class="step-content">
+            <h2>ขั้นตอนที่ 4: ตรวจสอบแต่ละค่า $y$ และหา $x, z$</h2>
+            <p>เราจะตรวจสอบแต่ละค่าของ $y$ ที่เป็นไปได้ จาก $y=1$ ถึง $y=6$ เพื่อหาคู่ของ $x, z$ ที่เป็นจำนวนเต็มบวก และคำนวณค่าของ $(x-y)z$ </p>
+            <p>จากขั้นตอนที่ 2 เรามี: <br> $x+z = 3y$ (สมการ 1) <br> $xz = 5y^2 - 115$ (สมการ A)</p>
+
+            <!-- Y = 1 -->
+            <div class="card">
+                <h4>กรณี: $y = 1$</h4>
+                <button onclick="toggleCardContent(this, 'y1_content')">แสดงรายละเอียด</button>
+                <div id="y1_content" class="card-content">
+                    <div class="math-block">
+                        $x+z = 3(1) = 3$ <br>
+                        $xz = 5(1)^2 - 115 = 5 - 115 = -110$
+                    </div>
+                    <p class="error-message">
+                        ผลคูณ $xz = -110$ ซึ่งติดลบ <br>
+                        เนื่องจาก $x, z$ ต้องเป็นจำนวนเต็มบวก ดังนั้นผลคูณ $xz$ จะต้องเป็นบวกเท่านั้น <br>
+                        $\Rightarrow$ <span class="highlight">ค่า $y=1$ ไม่เป็นไปได้</span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Y = 2 -->
+            <div class="card">
+                <h4>กรณี: $y = 2$</h4>
+                <button onclick="toggleCardContent(this, 'y2_content')">แสดงรายละเอียด</button>
+                <div id="y2_content" class="card-content">
+                    <div class="math-block">
+                        $x+z = 3(2) = 6$ <br>
+                        $xz = 5(2)^2 - 115 = 5(4) - 115 = 20 - 115 = -95$
+                    </div>
+                    <p class="error-message">
+                        ผลคูณ $xz = -95$ ซึ่งติดลบ <br>
+                        ดังนั้น <span class="highlight">ค่า $y=2$ ไม่เป็นไปได้</span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Y = 3 -->
+            <div class="card">
+                <h4>กรณี: $y = 3$</h4>
+                <button onclick="toggleCardContent(this, 'y3_content')">แสดงรายละเอียด</button>
+                <div id="y3_content" class="card-content">
+                    <div class="math-block">
+                        $x+z = 3(3) = 9$ <br>
+                        $xz = 5(3)^2 - 115 = 5(9) - 115 = 45 - 115 = -70$
+                    </div>
+                    <p class="error-message">
+                        ผลคูณ $xz = -70$ ซึ่งติดลบ <br>
+                        ดังนั้น <span class="highlight">ค่า $y=3$ ไม่เป็นไปได้</span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Y = 4 -->
+            <div class="card">
+                <h4>กรณี: $y = 4$</h4>
+                <button onclick="toggleCardContent(this, 'y4_content')">แสดงรายละเอียด</button>
+                <div id="y4_content" class="card-content">
+                    <div class="math-block">
+                        $x+z = 3(4) = 12$ <br>
+                        $xz = 5(4)^2 - 115 = 5(16) - 115 = 80 - 115 = -35$
+                    </div>
+                    <p class="error-message">
+                        ผลคูณ $xz = -35$ ซึ่งติดลบ <br>
+                        ดังนั้น <span class="highlight">ค่า $y=4$ ไม่เป็นไปได้</span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Y = 5 -->
+            <div class="card">
+                <h4>กรณี: $y = 5$</h4>
+                <button onclick="toggleCardContent(this, 'y5_content')">แสดงรายละเอียด</button>
+                <div id="y5_content" class="card-content">
+                    <div class="math-block">
+                        $x+z = 3(5) = 15$ <br>
+                        $xz = 5(5)^2 - 115 = 5(25) - 115 = 125 - 115 = 10$
+                    </div>
+                    <p>เราได้สมการกำลังสองสำหรับ $t$ (ซึ่งรากคือ $x$ และ $z$) เป็น:</p>
+                    <div class="math-block">
+                        $$t^2 - 15t + 10 = 0$$
+                    </div>
+                    <p>หาค่ารากโดยใช้สูตร quadratic formula ($t = \frac{-b \pm \sqrt{b^2-4ac}}{2a}$):</p>
+                    <div class="math-block">
+                        $t = \frac{15 \pm \sqrt{(-15)^2 - 4(1)(10)}}{2(1)}$ <br>
+                        $t = \frac{15 \pm \sqrt{225 - 40}}{2}$ <br>
+                        $t = \frac{15 \pm \sqrt{185}}{2}$
+                    </div>
+                    <p class="error-message">
+                        เนื่องจาก $\sqrt{185}$ ไม่ใช่จำนวนเต็ม (และไม่สามารถทำให้เป็นจำนวนเต็มได้) ดังนั้น $x$ และ $z$ จะไม่เป็นจำนวนเต็ม <br>
+                        $\Rightarrow$ <span class="highlight">ค่า $y=5$ ไม่เป็นไปได้</span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Y = 6 -->
+            <div class="card">
+                <h4>กรณี: $y = 6$</h4>
+                <button onclick="toggleCardContent(this, 'y6_content')">แสดงรายละเอียด</button>
+                <div id="y6_content" class="card-content">
+                    <div class="math-block">
+                        $x+z = 3(6) = 18$ <br>
+                        $xz = 5(6)^2 - 115 = 5(36) - 115 = 180 - 115 = 65$
+                    </div>
+                    <p>เราได้สมการกำลังสองสำหรับ $t$ (ซึ่งรากคือ $x$ และ $z$) เป็น:</p>
+                    <div class="math-block">
+                        $$t^2 - 18t + 65 = 0$$
+                    </div>
+                    <p>หาค่ารากโดยการแยกตัวประกอบ:</p>
+                    <div class="math-block">
+                        $(t - 5)(t - 13) = 0$ <br>
+                        ดังนั้น $t = 5$ หรือ $t = 13$
+                    </div>
+                    <p class="success-message">
+                        เราได้ค่า $t$ เป็นจำนวนเต็ม นั่นคือ $x$ และ $z$ คือ $5$ และ $13$ <br>
+                        เป็นไปได้ 2 กรณี: <br>
+                        1. ถ้า $x=5, z=13$ (และ $y=6$) <br>
+                        2. ถ้า $x=13, z=5$ (และ $y=6$)
+                    </p>
+
+                    <p>ตรวจสอบเงื่อนไข $x, y, z$ เป็นจำนวนเต็มบวก: <span class="highlight">ผ่าน!</span></p>
+
+                    <p>คำนวณค่าของ $(x-y)z$ สำหรับแต่ละกรณี:</p>
+                    <ul>
+                        <li><span class="highlight">กรณีที่ 1: $x=5, y=6, z=13$</span>
+                            <div class="math-block">
+                                $(x-y)z = (5-6)(13) = (-1)(13) = -13$
+                            </div>
+                        </li>
+                        <li><span class="highlight">กรณีที่ 2: $x=13, y=6, z=5$</span>
+                            <div class="math-block">
+                                $(x-y)z = (13-6)(5) = (7)(5) = 35$
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <button onclick="revealStep(5)">แสดงขั้นตอนที่ 5: สรุปผลลัพธ์</button>
+        </div>
+
+        <div id="step5" class="step-content">
+            <h2>ขั้นตอนที่ 5: สรุปผลลัพธ์และหาค่าสูงสุด</h2>
+            <p>จากการตรวจสอบค่า $y$ ทั้งหมดที่เป็นไปได้ มีเพียงกรณีเดียวที่ให้ค่า $x$ และ $z$ เป็นจำนวนเต็มบวก คือเมื่อ $y=6$ ซึ่งให้ผลลัพธ์ 2 ชุด ดังนี้:</p>
+            <ul>
+                <li>ถ้า $x=5, y=6, z=13 \Rightarrow (x-y)z = -13$</li>
+                <li>ถ้า $x=13, y=6, z=5 \Rightarrow (x-y)z = 35$</li>
+            </ul>
+            <p>เมื่อเปรียบเทียบค่าทั้งสองคือ $-13$ และ $35$ ค่าที่มากที่สุดคือ $35$</p>
+
+            <div class="result-box">
+                ค่ามากที่สุดของ $(x-y)z$ คือ $\boxed{35}$
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Function to reveal specific steps
+        function revealStep(stepNumber) {
+            // Hide all step contents first
+            document.querySelectorAll('.step-content').forEach(function(el) {
+                el.style.display = 'none';
+            });
+            // Show the requested step content
+            document.getElementById('step' + stepNumber).style.display = 'block';
+
+            // Ensure MathJax re-renders any newly visible mathematical content
+            MathJax.typesetPromise();
+        }
+
+        // Function to toggle the visibility of content within a card (for y-cases)
+        function toggleCardContent(button, contentId) {
+            const content = document.getElementById(contentId);
+            if (content.style.display === 'block') {
+                content.style.display = 'none';
+                button.textContent = 'แสดงรายละเอียด';
+            } else {
+                content.style.display = 'block';
+                button.textContent = 'ซ่อนรายละเอียด';
+            }
+            // Ensure MathJax re-renders if content becomes visible
+            MathJax.typesetPromise(); 
+        }
+
+        // Initialize by showing only the first step when the page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            revealStep(1);
+        });
+    </script>
+</body>
+</html>

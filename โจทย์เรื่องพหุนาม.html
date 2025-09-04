@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>การหาค่าสูงสุดของ |P(-1)| (พหุนาม)</title>
+    <!-- MathJax CDN for rendering LaTeX mathematics -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$']],
+                displayMath: [['$$', '$$']],
+                processEscapes: true
+            },
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+            },
+            startup: {
+                ready: () => {
+                    MathJax.startup.defaultReady();
+                    MathJax.startup.promise.then(() => console.log('MathJax ready'));
+                }
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #f0f4f8, #e0e8f0);
+            color: #333;
+            line-height: 1.6;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+        .container {
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            max-width: 900px;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+        h1, h2, h3 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .problem-statement, .step-card {
+            background-color: #fdfdfd;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s ease-in-out;
+        }
+        .step-card {
+            display: none; /* Hidden by default, JavaScript will show them step by step */
+        }
+        .step-card:first-of-type {
+            display: block; /* Show the first step initially */
+        }
+        .step-card h3 {
+            color: #3498db;
+            margin-top: 0;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .step-card p {
+            margin-bottom: 10px;
+        }
+        .math-display {
+            background-color: #ecf0f1;
+            border-left: 5px solid #3498db;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 1.1em;
+        }
+        .controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        .btn {
+            padding: 12px 25px;
+            font-size: 1em;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .btn-primary {
+            background-color: #3498db;
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+        }
+        .btn-secondary {
+            background-color: #95a5a6;
+            color: white;
+        }
+        .btn-secondary:hover {
+            background-color: #7f8c8d;
+            transform: translateY(-2px);
+        }
+        .final-answer {
+            text-align: center;
+            margin-top: 40px;
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #27ae60;
+            background-color: #e8f8f5;
+            padding: 25px;
+            border-radius: 10px;
+            border: 2px solid #2ecc71;
+            box-shadow: 0 6px 20px rgba(46, 204, 113, 0.2);
+            display: none; /* Hidden until revealed */
+        }
+        .highlight {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        ul {
+            list-style-type: disc;
+            margin-left: 20px;
+            padding: 0;
+        }
+        li {
+            margin-bottom: 8px;
+        }
+        .summary-point {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>การหาค่าสูงสุดของ $|P(-1)|$</h1>
+        <div class="problem-statement">
+            <h2>โจทย์:</h2>
+            <p>กำหนดให้ $n$ เป็นจำนวนเต็มที่ไม่เป็นลบ และให้พหุนาม $P(x)$ มีสัมประสิทธิ์เป็นจำนวนเต็มที่สอดคล้องกับเงื่อนไขต่อไปนี้:</p>
+            <div class="math-display">
+                $$ P(x) = a_0 + a_1x + a_2x^2 + \cdots + a_nx^n $$
+            </div>
+            <ol>
+                <li>$a_k \ge k$ สำหรับ $k = 0,1,2, \ldots, n$</li>
+                <li>$P(1) = 135$</li>
+                <li>$P(10) = 2025$</li>
+            </ol>
+            <p>จงหาค่ามากที่สุดที่เป็นไปได้ของ $|P(-1)|$</p>
+        </div>
+
+        <div class="step-card">
+            <h3>ขั้นตอนที่ 1: วิเคราะห์ดีกรี $n$ ของพหุนาม</h3>
+            <p>เริ่มต้นด้วยการพิจารณาเงื่อนไข $a_k \ge k$ และ $P(10) = 2025$ เพื่อหาค่าสูงสุดที่เป็นไปได้ของ $n$ (ดีกรีของพหุนาม)</p>
+            <ul>
+                <li><span class="summary-point">กรณี $n=0$:</span> $P(x) = a_0$.
+                <ul>
+                    <li>จาก $P(1) = 135 \implies a_0 = 135$.</li>
+                    <li>จาก $P(10) = 2025 \implies a_0 = 2025$.</li>
+                    <li>เกิดข้อขัดแย้ง ($135 \ne 2025$) ดังนั้น $n \ne 0$.</li>
+                </ul>
+                </li>
+                <li><span class="summary-point">กรณี $n=1$:</span> $P(x) = a_0 + a_1x$.
+                <ul>
+                    <li>จาก $P(1) = 135 \implies a_0 + a_1 = 135$.</li>
+                    <li>จาก $P(10) = 2025 \implies a_0 + 10a_1 = 2025$.</li>
+                    <li>นำสมการที่สองลบด้วยสมการแรก: $9a_1 = 1890 \implies a_1 = 210$.</li>
+                    <li>แทนค่า $a_1$ กลับไป: $a_0 = 135 - 210 = -75$.</li>
+                    <li>แต่จากเงื่อนไข $a_k \ge k$: $a_0 \ge 0$. ค่า $a_0 = -75$ ขัดแย้งกับเงื่อนไข. ดังนั้น $n \ne 1$.</li>
+                </ul>
+                </li>
+                <li><span class="summary-point">กรณี $n \ge 3$:</span>
+                    ถ้า $n=3$, $P(x) = a_0 + a_1x + a_2x^2 + a_3x^3$.
+                    จากเงื่อนไข $a_k \ge k$: $a_0 \ge 0$, $a_1 \ge 1$, $a_2 \ge 2$, $a_3 \ge 3$.
+                    พิจารณา $P(10) = a_0 + 10a_1 + 100a_2 + 1000a_3$.
+                    ค่าต่ำสุดของ $P(10)$ ที่เป็นไปได้เมื่อ $n=3$ คือ:
+                    <div class="math-display">
+                        $$ P(10) \ge 0 + 10(1) + 100(2) + 1000(3) = 0 + 10 + 200 + 3000 = 3210 $$
+                    </div>
+                    แต่โจทย์กำหนดให้ $P(10) = 2025$. ค่าต่ำสุด $3210$ สูงกว่า $2025$.
+                    ดังนั้น $n$ ไม่สามารถเป็น $3$ หรือมากกว่าได้ ($n \not\ge 3$).
+                </li>
+            </ul>
+            <p>จากทั้งหมดนี้ สรุปได้ว่าดีกรีของพหุนาม <span class="highlight">$n$ จะต้องเป็น $2$</span> เท่านั้น</p>
+            <div class="math-display">
+                $$ P(x) = a_0 + a_1x + a_2x^2 $$
+            </div>
+        </div>
+
+        <div class="step-card">
+            <h3>ขั้นตอนที่ 2: ตั้งสมการสำหรับ $n=2$</h3>
+            <p>เมื่อเราทราบว่า $n=2$ เราสามารถเขียนพหุนามและเงื่อนไขใหม่อีกครั้ง:</p>
+            <ul>
+                <li>สมการพหุนาม: $P(x) = a_0 + a_1x + a_2x^2$</li>
+                <li>เงื่อนไขสัมประสิทธิ์เป็นจำนวนเต็ม: $a_0, a_1, a_2 \in \mathbb{Z}$</li>
+                <li>เงื่อนไข $a_k \ge k$:
+                    <ul>
+                        <li>$a_0 \ge 0$</li>
+                        <li>$a_1 \ge 1$</li>
+                        <li>$a_2 \ge 2$</li>
+                    </ul>
+                </li>
+                <li>เงื่อนไข $P(1) = 135$:
+                    <div class="math-display">
+                        $$ a_0 + a_1 + a_2 = 135 \quad \ldots (1) $$
+                    </div>
+                </li>
+                <li>เงื่อนไข $P(10) = 2025$:
+                    <div class="math-display">
+                        $$ a_0 + 10a_1 + 100a_2 = 2025 \quad \ldots (2) $$
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <div class="step-card">
+            <h3>ขั้นตอนที่ 3: แก้สมการเพื่อหาสัมประสิทธิ์ในรูปตัวแปรเดียว</h3>
+            <p>เรามีสองสมการและสามตัวแปร $a_0, a_1, a_2$ เราจะใช้การกำจัดตัวแปรเพื่อลดรูปสมการ</p>
+            <p>นำสมการ (2) ลบด้วยสมการ (1):</p>
+            <div class="math-display">
+                $$ (a_0 + 10a_1 + 100a_2) - (a_0 + a_1 + a_2) = 2025 - 135 $$
+                $$ 9a_1 + 99a_2 = 1890 $$
+            </div>
+            <p>หารตลอดด้วย $9$:</p>
+            <div class="math-display">
+                $$ a_1 + 11a_2 = 210 \quad \ldots (3) $$
+            </div>
+            <p>จากสมการ (3) เราสามารถเขียน $a_1$ ในรูปของ $a_2$ ได้:</p>
+            <div class="math-display">
+                $$ a_1 = 210 - 11a_2 $$
+            </div>
+            <p>ต่อไป เราจะเขียน $a_0$ ในรูปของ $a_2$ โดยใช้สมการ (1) และแทนค่า $a_1$:</p>
+            <div class="math-display">
+                $$ a_0 = 135 - a_1 - a_2 $$
+                $$ a_0 = 135 - (210 - 11a_2) - a_2 $$
+                $$ a_0 = 135 - 210 + 11a_2 - a_2 $$
+                $$ a_0 = 10a_2 - 75 $$
+            </div>
+            <p>ตอนนี้เราได้สัมประสิทธิ์ทั้งหมดในรูปของ $a_2$:</p>
+            <ul>
+                <li>$a_0 = 10a_2 - 75$</li>
+                <li>$a_1 = 210 - 11a_2$</li>
+                <li>$a_2$ (เป็นตัวแปรหลักของเรา)</li>
+            </ul>
+        </div>
+
+        <div class="step-card">
+            <h3>ขั้นตอนที่ 4: กำหนดช่วงที่เป็นไปได้ของ $a_2$</h3>
+            <p>ใช้เงื่อนไข $a_k \ge k$ และ $a_k \in \mathbb{Z}$ เพื่อหาช่วงของค่า $a_2$ ที่เป็นไปได้</p>
+            <ul>
+                <li><span class="summary-point">เงื่อนไข $a_2 \ge 2$:</span>
+                    <div class="math-display">
+                        $$ a_2 \ge 2 $$
+                    </div>
+                    (จากโจทย์)
+                </li>
+                <li><span class="summary-point">เงื่อนไข $a_1 \ge 1$:</span>
+                    <div class="math-display">
+                        $$ 210 - 11a_2 \ge 1 $$
+                        $$ 209 \ge 11a_2 $$
+                        $$ a_2 \le \frac{209}{11} $$
+                        $$ a_2 \le 19 $$
+                    </div>
+                </li>
+                <li><span class="summary-point">เงื่อนไข $a_0 \ge 0$:</span>
+                    <div class="math-display">
+                        $$ 10a_2 - 75 \ge 0 $$
+                        $$ 10a_2 \ge 75 $$
+                        $$ a_2 \ge \frac{75}{10} $$
+                        $$ a_2 \ge 7.5 $$
+                    </div>
+                </li>
+            </ul>
+            <p>รวมเงื่อนไขทั้งหมดสำหรับ $a_2$ ($a_2 \ge 2$, $a_2 \le 19$, $a_2 \ge 7.5$) และเนื่องจาก $a_2$ เป็นจำนวนเต็ม เราได้:</p>
+            <div class="math-display">
+                $$ 8 \le a_2 \le 19 $$
+            </div>
+            <p>นี่คือช่วงค่าที่เป็นไปได้สำหรับ $a_2$</p>
+        </div>
+
+        <div class="step-card">
+            <h3>ขั้นตอนที่ 5: เขียน $P(-1)$ ในรูปของ $a_2$</h3>
+            <p>เราต้องการหาค่ามากที่สุดของ $|P(-1)|$ ก่อนอื่นให้เขียน $P(-1)$ ในรูปของ $a_2$:</p>
+            <div class="math-display">
+                $$ P(-1) = a_0 + a_1(-1) + a_2(-1)^2 $$
+                $$ P(-1) = a_0 - a_1 + a_2 $$
+            </div>
+            <p>แทนค่า $a_0 = 10a_2 - 75$ และ $a_1 = 210 - 11a_2$ ลงในสมการสำหรับ $P(-1)$:</p>
+            <div class="math-display">
+                $$ P(-1) = (10a_2 - 75) - (210 - 11a_2) + a_2 $$
+                $$ P(-1) = 10a_2 - 75 - 210 + 11a_2 + a_2 $$
+                $$ P(-1) = (10 + 11 + 1)a_2 - (75 + 210) $$
+                $$ P(-1) = 22a_2 - 285 $$
+            </div>
+            <p>ตอนนี้เรามี $P(-1)$ เป็นฟังก์ชันเชิงเส้นของ $a_2$ ซึ่งง่ายต่อการวิเคราะห์</p>
+        </div>
+
+        <div class="step-card">
+            <h3>ขั้นตอนที่ 6: หาค่ามากที่สุดของ $|P(-1)|$</h3>
+            <p>เราต้องการค่ามากที่สุดของ $|P(-1)| = |22a_2 - 285|$ ในช่วง $8 \le a_2 \le 19$</p>
+            <p>เนื่องจาก $P(-1)$ เป็นฟังก์ชันเชิงเส้น (กราฟเป็นเส้นตรง) ค่าสัมบูรณ์สูงสุดของมันจะอยู่ที่จุดปลายของช่วง $a_2$ เท่านั้น:</p>
+            <ul>
+                <li><span class="summary-point">กรณีที่ 1: เมื่อ $a_2 = 8$ (ค่าต่ำสุดของ $a_2$)</span>
+                    <div class="math-display">
+                        $$ P(-1) = 22(8) - 285 = 176 - 285 = -109 $$
+                        $$ |P(-1)| = |-109| = 109 $$
+                    </div>
+                    ค่าสัมประสิทธิ์ที่ได้คือ: $a_2 = 8$, $a_1 = 210 - 11(8) = 122$, $a_0 = 10(8) - 75 = 5$.
+                    (ตรวจสอบแล้วสอดคล้องทุกเงื่อนไข: $a_0=5 \ge 0$, $a_1=122 \ge 1$, $a_2=8 \ge 2$)
+                </li>
+                <li><span class="summary-point">กรณีที่ 2: เมื่อ $a_2 = 19$ (ค่าสูงสุดของ $a_2$)</span>
+                    <div class="math-display">
+                        $$ P(-1) = 22(19) - 285 = 418 - 285 = 133 $$
+                        $$ |P(-1)| = |133| = 133 $$
+                    </div>
+                    ค่าสัมประสิทธิ์ที่ได้คือ: $a_2 = 19$, $a_1 = 210 - 11(19) = 1$, $a_0 = 10(19) - 75 = 115$.
+                    (ตรวจสอบแล้วสอดคล้องทุกเงื่อนไข: $a_0=115 \ge 0$, $a_1=1 \ge 1$, $a_2=19 \ge 2$)
+                </li>
+            </ul>
+            <p>เมื่อเปรียบเทียบค่า $|P(-1)|$ จากทั้งสองกรณี ($109$ และ $133$) ค่าที่มากที่สุดคือ $133$</p>
+        </div>
+
+        <div class="final-answer" id="finalAnswer">
+            ค่ามากที่สุดที่เป็นไปได้ของ $|P(-1)|$ คือ <span class="highlight">133</span>
+        </div>
+
+        <div class="controls">
+            <span id="step-indicator" style="font-weight: bold; margin-right: 15px; color: #555;"></span>
+            <button id="prev-step-btn" class="btn btn-secondary" style="display: none;">ย้อนกลับ</button>
+            <button id="next-step-btn" class="btn btn-primary">ขั้นตอนถัดไป</button>
+        </div>
+    </div>
+
+    <script>
+        let currentStep = 0;
+        const steps = document.querySelectorAll('.step-card');
+        const nextBtn = document.getElementById('next-step-btn');
+        const prevBtn = document.getElementById('prev-step-btn');
+        const stepIndicatorSpan = document.getElementById('step-indicator');
+        const finalAnswerDiv = document.getElementById('finalAnswer');
+
+        function updateStepIndicator() {
+            stepIndicatorSpan.textContent = `ขั้นตอนที่ ${currentStep + 1} จาก ${steps.length}`;
+        }
+
+        function showStep(index) {
+            steps.forEach((step, i) => {
+                step.style.display = (i === index) ? 'block' : 'none';
+            });
+
+            updateStepIndicator();
+
+            prevBtn.style.display = (index > 0) ? 'inline-block' : 'none';
+            nextBtn.textContent = (index === steps.length - 1) ? 'ดูผลลัพธ์' : 'ขั้นตอนถัดไป';
+            if (index === steps.length - 1) {
+                nextBtn.onclick = showFinalResult;
+            } else {
+                nextBtn.onclick = goToNextStep;
+            }
+
+            // Ensure MathJax renders content for the newly visible step
+            MathJax.typesetPromise().catch((err) => console.error("MathJax typesetting error:", err));
+        }
+
+        function goToNextStep() {
+            if (currentStep < steps.length - 1) {
+                currentStep++;
+                showStep(currentStep);
+            }
+        }
+
+        function goToPrevStep() {
+            if (currentStep > 0) {
+                currentStep--;
+                showStep(currentStep);
+            }
+        }
+
+        function showFinalResult() {
+            finalAnswerDiv.style.display = 'block';
+            nextBtn.style.display = 'none';
+            prevBtn.style.display = 'none'; // No more navigation after showing final answer
+            // Optional: Re-render MathJax in case the final answer contains math, though unlikely here
+            MathJax.typesetPromise().catch((err) => console.error("MathJax typesetting error:", err)); 
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (steps.length > 0) {
+                showStep(currentStep);
+            } else {
+                nextBtn.style.display = 'none';
+                prevBtn.style.display = 'none';
+            }
+
+            // Set up event listeners for buttons
+            nextBtn.addEventListener('click', goToNextStep);
+            prevBtn.addEventListener('click', goToPrevStep);
+
+            // Initial MathJax render for problem statement (which is always visible)
+            // and the first step (which is visible on load).
+            MathJax.typesetPromise().catch((err) => console.error("Initial MathJax typesetting error:", err));
+        });
+    </script>
+</body>
+</html>

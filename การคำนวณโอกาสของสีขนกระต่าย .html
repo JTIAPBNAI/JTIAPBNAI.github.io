@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Genetics: Rabbit Fur Color Probability</title>
+    <script>window.MathJax = {tex: {inlineMath: [['$', '$']], displayMath: [['$$', '$$']], processEscapes: true}, options: {skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']}, startup: {ready: () => {MathJax.startup.defaultReady(); MathJax.startup.promise.then(() => console.log('MathJax ready'));}}};</script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Anuphan:wght@300;400;500;700&display=swap');
+        :root {
+            --primary-color: #4CAF50;
+            --secondary-color: #8BC34A;
+            --accent-color: #FFC107;
+            --bg-color: #f0fdf4;
+            --text-color: #333;
+            --border-color: #DCEADF;
+            --card-bg: #fff;
+            --shadow: rgba(0, 0, 0, 0.1);
+        }
+        body {
+            font-family: 'Anuphan', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+        .container {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 20px var(--shadow);
+            padding: 30px;
+            max-width: 900px;
+            width: 100%;
+            margin: 20px 0;
+            border: 1px solid var(--border-color);
+        }
+        h1, h2, h3 {
+            color: var(--primary-color);
+            margin-top: 0;
+            border-bottom: 2px solid var(--secondary-color);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        h1 {
+            font-size: 2.2em;
+            text-align: center;
+        }
+        h2 {
+            font-size: 1.8em;
+            color: var(--secondary-color);
+            border-bottom-color: var(--accent-color);
+        }
+        h3 {
+            font-size: 1.4em;
+            color: var(--text-color);
+            border-bottom: none;
+            padding-bottom: 0;
+            margin-bottom: 15px;
+        }
+        .step {
+            margin-bottom: 30px;
+            background-color: #f9fffb;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e0f2f1;
+        }
+        .step-content {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .highlight {
+            background-color: var(--accent-color);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+            color: #333;
+        }
+        .punnett-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1px;
+            background-color: var(--border-color);
+            border: 1px solid var(--border-color);
+            margin: 20px auto;
+            max-width: 300px;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        .punnett-cell {
+            background-color: var(--card-bg);
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        .punnett-cell.header {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+        .punnett-grid div:nth-child(3n+1):not(:first-child) {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+        .punnett-grid .male-gamete {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+        .punnett-grid .female-gamete {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+        .outcome-list {
+            list-style-type: disc;
+            padding-left: 20px;
+        }
+        .outcome-list li {
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .outcome-list li::before {
+            content: '✓';
+            color: var(--primary-color);
+            font-weight: bold;
+            margin-right: 5px;
+        }
+        .final-answer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 10px;
+            font-size: 1.5em;
+            font-weight: bold;
+            box-shadow: 0 2px 10px var(--shadow);
+        }
+        .math-block {
+            padding: 10px;
+            background-color: #e8f5e9;
+            border-left: 5px solid var(--primary-color);
+            margin: 15px 0;
+            font-family: 'Times New Roman', serif; /* For better math display */
+        }
+        .diagram-box {
+            background-color: #f1f8e9;
+            border: 1px dashed var(--primary-color);
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        .diagram-box h4 {
+            color: var(--primary-color);
+            margin-top: 0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            h1 {
+                font-size: 1.8em;
+            }
+            h2 {
+                font-size: 1.5em;
+            }
+            .punnett-grid {
+                max-width: 100%;
+                font-size: 1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🐰 การคำนวณโอกาสของสีขนกระต่าย 🐰</h1>
+        <p>โจทย์นี้เป็นการประยุกต์ใช้ความรู้ทางพันธุศาสตร์เกี่ยวกับการถ่ายทอดยีนหลายแอลลีล (Multiple Alleles) และการคำนวณความน่าจะเป็น เราจะมาดูวิธีคิดทีละขั้นตอนอย่างละเอียดเพื่อให้เข้าใจภาพรวมทั้งหมด</p>
+
+        <div class="step" id="step1">
+            <h2>ขั้นตอนที่ 1: ทำความเข้าใจลำดับการข่มของแอลลีล</h2>
+            <div class="step-content">
+                <p>ในกระต่าย มียีนที่ควบคุมสีขนอยู่บนออโตโซม โดยมีแอลลีล 4 แบบ ซึ่งมีการข่มกันดังนี้:</p>
+                <div class="diagram-box">
+                    <h4>ลำดับการข่ม (Dominance Hierarchy)</h4>
+                    <p>Agouti (C) > Chinchilla ($c^{ch}$) > Himalayan ($c^h$) > Albino (c)</p>
+                    <p>นั่นหมายความว่า:</p>
+                    <ul class="outcome-list">
+                        <li>แอลลีล <span class="highlight">C</span> ข่มแอลลีล $c^{ch}$, $c^h$, และ $c$</li>
+                        <li>แอลลีล <span class="highlight">$c^{ch}$</span> ข่มแอลลีล $c^h$ และ $c$ (แต่ถูก C ข่ม)</li>
+                        <li>แอลลีล <span class="highlight">$c^h$</span> ข่มแอลลีล $c$ (แต่ถูก C และ $c^{ch}$ ข่ม)</li>
+                        <li>แอลลีล <span class="highlight">c</span> เป็นแอลลีลด้อยที่สุด (ถูกทุกแอลลีลข่ม)</li>
+                    </ul>
+                </div>
+                <p>ดังนั้น ฟีโนไทป์ (ลักษณะที่แสดงออก) จะเป็นไปตามแอลลีลที่เด่นที่สุดที่ปรากฏในคู่ยีน</p>
+            </div>
+        </div>
+
+        <div class="step" id="step2">
+            <h2>ขั้นตอนที่ 2: หายีโนไทป์ของพ่อแม่กระต่าย</h2>
+            <div class="step-content">
+                <h3>2.1 ข้อมูลที่โจทย์ให้มา:</h3>
+                <ul class="outcome-list">
+                    <li>พ่อ: ขนสี Agouti (ฟีโนไทป์ Agouti)</li>
+                    <li>แม่: พันธุ์แท้ขนสี Himalayan (ฟีโนไทป์ Himalayan, และเป็นพันธุ์แท้)</li>
+                    <li>ลูกครอกแรกมีกระต่ายสี Chinchilla หนึ่งตัว</li>
+                </ul>
+
+                <h3>2.2 หายีโนไทป์ของแม่:</h3>
+                <p>แม่เป็นกระต่ายขนสี Himalayan พันธุ์แท้ ดังนั้น ยีโนไทป์ของแม่คือ <span class="highlight">$c^h c^h$</span></p>
+
+                <h3>2.3 หายีโนไทป์ของพ่อ:</h3>
+                <p>พ่อมีขนสี Agouti ดังนั้น ยีโนไทป์ของพ่อต้องมีแอลลีล C นำหน้า อาจเป็น $CC$, $C c^{ch}$, $C c^h$, หรือ $Cc$</p>
+                <p>แต่มีข้อมูลสำคัญคือ <b>"ลูกครอกแรกมีกระต่ายสี Chinchilla หนึ่งตัว"</b></p>
+                <div class="diagram-box">
+                    <h4>การวิเคราะห์ยีโนไทป์ลูก Chinchilla:</h4>
+                    <ul class="outcome-list">
+                        <li>ลูกสี Chinchilla ต้องมียีน $c^{ch}$ อย่างน้อย 1 แอลลีล</li>
+                        <li>แม่มียีโนไทป์ $c^h c^h$ ซึ่งจะให้แอลลีล $c^h$ แก่ลูกเสมอ</li>
+                        <li>ดังนั้น ลูกสี Chinchilla จะต้องได้รับแอลลีล $c^h$ จากแม่ และได้รับแอลลีล $c^{ch}$ จากพ่อ</li>
+                        <li>ยีโนไทป์ของลูก Chinchilla ตัวนั้นคือ <span class="highlight">$c^{ch} c^h$</span></li>
+                    </ul>
+                </div>
+                <p>จากข้อสรุปข้างต้น แสดงว่าพ่อซึ่งมีฟีโนไทป์ Agouti จะต้องมียีน <span class="highlight">$c^{ch}$</span> อยู่ด้วย เพื่อที่จะส่งต่อให้ลูกได้</p>
+                <p>ดังนั้น ยีโนไทป์ของพ่อจึงเป็น <span class="highlight">$C c^{ch}$</span></p>
+
+                <h3>สรุปยีโนไทป์ของพ่อแม่:</h3>
+                <ul class="outcome-list">
+                    <li>พ่อ (Agouti): <span class="highlight">$C c^{ch}$</span></li>
+                    <li>แม่ (Himalayan พันธุ์แท้): <span class="highlight">$c^h c^h$</span></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="step" id="step3">
+            <h2>ขั้นตอนที่ 3: สร้างตาราง Punnett Square และหาโอกาสของลูกที่เกิดใหม่</h2>
+            <div class="step-content">
+                <p>เราจะนำพ่อแม่ที่มี ยีโนไทป์ <span class="highlight">$C c^{ch}$</span> และ <span class="highlight">$c^h c^h$</span> มาผสมพันธุ์กัน</p>
+
+                <h3>ตาราง Punnett Square:</h3>
+                <div class="punnett-grid">
+                    <div class="punnett-cell header">♀ \ ♂</div>
+                    <div class="punnett-cell male-gamete">$C$</div>
+                    <div class="punnett-cell male-gamete">$c^{ch}$</div>
+                    <div class="punnett-cell female-gamete">$c^h$</div>
+                    <div class="punnett-cell">$C c^h$</div>
+                    <div class="punnett-cell">$c^{ch} c^h$</div>
+                    <div class="punnett-cell female-gamete">$c^h$</div>
+                    <div class="punnett-cell">$C c^h$</div>
+                    <div class="punnett-cell">$c^{ch} c^h$</div>
+                </div>
+
+                <h3>ผลลัพธ์จากตาราง Punnett Square:</h3>
+                <ul class="outcome-list">
+                    <li>ลูกมียีโนไทป์ $C c^h$: 2 ช่อง จากทั้งหมด 4 ช่อง</li>
+                    <li>ลูกมียีโนไทป์ $c^{ch} c^h$: 2 ช่อง จากทั้งหมด 4 ช่อง</li>
+                </ul>
+
+                <h3>ฟีโนไทป์และโอกาสของลูกแต่ละตัว:</h3>
+                <div class="math-block">
+                    <h4>1. กระต่ายขนสี Agouti:</h4>
+                    <p>ยีโนไทป์ $C c^h$ (C ข่ม $c^h$)</p>
+                    <p>โอกาสได้ลูก Agouti = $\frac{2}{4} = \frac{1}{2}$</p>
+                    <h4>2. กระต่ายขนสี Chinchilla:</h4>
+                    <p>ยีโนไทป์ $c^{ch} c^h$ ($c^{ch}$ ข่ม $c^h$)</p>
+                    <p>โอกาสได้ลูก Chinchilla = $\frac{2}{4} = \frac{1}{2}$</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="step" id="step4">
+            <h2>ขั้นตอนที่ 4: คำนวณโอกาสสำหรับลูก 3 ตัวที่โจทย์กำหนด</h2>
+            <div class="step-content">
+                <p>โจทย์ถามหาโอกาสที่จะได้ลูก 3 ตัว ในท้องแม่ โดยมี:</p>
+                <ul class="outcome-list">
+                    <li>กระต่ายเพศเมียขนสี Agouti 2 ตัว</li>
+                    <li>กระต่ายเพศผู้ขนสี Chinchilla 1 ตัว</li>
+                </ul>
+
+                <h3>4.1 โอกาสของเพศ:</h3>
+                <p>โอกาสได้ลูกเพศเมีย = $\frac{1}{2}$</p>
+                <p>โอกาสได้ลูกเพศผู้ = $\frac{1}{2}$</p>
+
+                <h3>4.2 โอกาสของฟีโนไทป์ที่ต้องการรวมกับเพศ:</h3>
+                <div class="math-block">
+                    <h4>โอกาสได้ลูกเพศเมียขนสี Agouti:</h4>
+                    <p>$P(\text{เมีย Agouti}) = P(\text{เมีย}) \times P(\text{Agouti}) = \frac{1}{2} \times \frac{1}{2} = \frac{1}{4}$</p>
+                    <h4>โอกาสได้ลูกเพศผู้ขนสี Chinchilla:</h4>
+                    <p>$P(\text{ผู้ Chinchilla}) = P(\text{ผู้}) \times P(\text{Chinchilla}) = \frac{1}{2} \times \frac{1}{2} = \frac{1}{4}$</p>
+                </div>
+
+                <h3>4.3 คำนวณความน่าจะเป็นรวมสำหรับลูก 3 ตัว:</h3>
+                <p>เราต้องการลูก 3 ตัว โดยมีลำดับของเหตุการณ์ที่ไม่เจาะจง (คือลูก 2 ตัวเป็นเมีย Agouti และ 1 ตัวเป็นผู้ Chinchilla ไม่ว่าจะเกิดเรียงลำดับไหน)</p>
+                <p>ใช้สูตรความน่าจะเป็นแบบทวินาม (Binomial Probability) หรือการจัดหมู่ (Combinations):</p>
+                <div class="math-block">
+                    <p>จำนวนวิธีจัดเรียงลูก 3 ตัว ให้มี เมีย Agouti 2 ตัว และ ผู้ Chinchilla 1 ตัว คือ:</p>
+                    $$ \frac{3!}{2!1!} = \frac{3 \times 2 \times 1}{(2 \times 1)(1)} = 3 $$
+                    <p>หมายความว่า มี 3 รูปแบบที่เป็นไปได้ เช่น:</p>
+                    <ul class="outcome-list">
+                        <li>(เมีย Agouti, เมีย Agouti, ผู้ Chinchilla)</li>
+                        <li>(เมีย Agouti, ผู้ Chinchilla, เมีย Agouti)</li>
+                        <li>(ผู้ Chinchilla, เมีย Agouti, เมีย Agouti)</li>
+                    </ul>
+
+                    <p>โอกาสของแต่ละรูปแบบ (เช่น โอกาสของ (เมีย Agouti, เมีย Agouti, ผู้ Chinchilla)):</p>
+                    $$ P(\text{รูปแบบหนึ่ง}) = P(\text{เมีย Agouti}) \times P(\text{เมีย Agouti}) \times P(\text{ผู้ Chinchilla}) $$
+                    $$ P(\text{รูปแบบหนึ่ง}) = \frac{1}{4} \times \frac{1}{4} \times \frac{1}{4} = \frac{1}{64} $$
+
+                    <p>ดังนั้น โอกาสรวมสำหรับลูก 3 ตัวตามที่โจทย์กำหนดคือ:</p>
+                    $$ P(\text{รวม}) = (\text{จำนวนวิธีจัดเรียง}) \times P(\text{รูปแบบหนึ่ง}) $$
+                    $$ P(\text{รวม}) = 3 \times \frac{1}{64} = \frac{3}{64} $$
+                </div>
+            </div>
+        </div>
+
+        <div class="final-answer">
+            <p>โอกาสที่จะได้ลูกเพศเมียขนสี Agouti 2 ตัว และลูกเพศผู้ขนสี Chinchilla 1 ตัว คือ:</p>
+            <p class="highlight">$\frac{3}{64}$</p>
+            <p>ซึ่งตรงกับตัวเลือก <strong>ข. 3/64</strong></p>
+        </div>
+    </div>
+
+    <script>
+        // Optional: Any specific JavaScript for interactivity could go here.
+        // For this educational explanation, static content is sufficient.
+        // If dynamic rendering of MathJax is needed after DOM manipulation,
+        // MathJax.typesetPromise() should be called.
+    </script>
+</body>
+</html>
