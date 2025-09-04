@@ -20,7 +20,7 @@ Each artifact is self-contained and runs directly in your browser — just click
 - [โจทย์เรื่องพหุนาม](https://JTIAPBNAI.github.io/โจทย์เรื่องพหุนาม.html)
 - [โจทย์เรื่องเรขาคณิต](https://JTIAPBNAI.github.io/โจทย์เรื่องเรขาคณิต.html)
 
-### 🧬 Science Concepts
+### Science Concepts
 - [ตารางธาตุ](https://JTIAPBNAI.github.io/ตารางธาตุ.html)
 - [แบบจำลองความต่างศักย์ไฟฟ้า](https://JTIAPBNAI.github.io/แบบจำลองความต่างศักย์ไฟฟ้า.html)
 - [สรุปกลศาสตร์ของไหลเบื้องต้น](https://JTIAPBNAI.github.io/สรุปกลศาสตร์ของไหลเบื้องต้น.html)
@@ -28,14 +28,14 @@ Each artifact is self-contained and runs directly in your browser — just click
 
 ---
 
-## ⚡ Notes
+## Notes
 - No installation needed — pure HTML, CSS, and JS.  
 - Some artifacts may require WebGL or Canvas-enabled browsers.  
 - Contributions welcome! Add your own artifacts by placing HTML files in the repo and linking them in this README.
 
 ---
 
-## 📜 License
+## License
 This project is released under the MIT License.  
 Feel free to remix, adapt, and share with attribution.
 
